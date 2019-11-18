@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'auction/listings.css' %}">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,900" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+</head>
+<body>
+  {% if item %}
+      <ul id='item' itemid={{item.id}}>
+          <li>{{ item.title }}</li>
+          <li>{{ item.description }}</li>
+          <img src ="{{ item.image.url }}" width="200px" height="200px">
+          <li>{{ item.endDateTime }}</li>
+          <li>{{ item.userProfile }}</li>
+      </ul>
+      <input id='bid-amount' type="number" name="number" value="{{ item.price }}">
+      <button type="button" name="button" onclick="bidOnItem()">Bid</button>
+  {% else %}
+      <p>item doesnt exist</p>
+  {% endif %}
+
+  {% if bids %}
+  <br><br>
+  <h3>Bids on this Item</h3>
+  <ul>
+    {% for bid in bids %}
+      <li>Bidder: {{bid.userProfile.email}} Amount: {{bid.amount}}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+
+  <script type="text/javascript">
+
+    function handleBidResp(resp) {
+
+    }
+
+    function handleBidErr(err) {
+
+    }
+
+    function bidOnItem() {
+      let csrf = $('input[name=csrfmiddlewaretoken]').val();
+      $.ajax({
+        url: '/auction/bids/',
+        type: 'post',
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken")
+        },
+        data:{
+          itemId: $('#item').attr('itemid'),
+          amount: $('#bid-amount').val(),
+          userId: 1
+        },
+        success: handleBidResp,
+        error: handleBidErr,
+      });
+    }
+
+    function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+        var cookies = document.cookie.split(";");
+        for (var i = 0; i < cookies.length; i++) {
+          var cookie = cookies[i].trim();
+          // Does this cookie string begin with the name we want?
+          if (cookie.substring(0, name.length + 1) === name + "=") {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+  </script>
+</body>
+
+</html>
