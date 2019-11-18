@@ -1,13 +1,10 @@
-{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Login</title>
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{% static 'auction/listings.css' %}"
-    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Auction App</title>
     <link
       href="https://fonts.googleapis.com/css?family=Roboto:400,900"
       rel="stylesheet"
@@ -64,26 +61,5 @@
         </ul>
       </div>
     </nav>
-
-    <h2>Current Listings</h2>
-    <table class="table">
-      {% if items %} {% for item in items %} {{item.image}}
-      <tr>
-        <td width="10%" rowspan="2">
-          <img src="{{ item.image.url }}" width="200px" height="200px" />
-        </td>
-        <td width="30%"><h3>{{ item.title }}</h3></td>
-        <td width="20%">{{ item.endDateTime }}</td>
-      </tr>
-      <tr>
-        <td>{{ item.description }}</td>
-        <td>£{{ item.price }}</td>
-      </tr>
-      {% endfor %}
-    </table>
-
-    {% else %}
-    <p>there are no items up for bid</p>
-    {% endif %}
   </body>
 </html>
