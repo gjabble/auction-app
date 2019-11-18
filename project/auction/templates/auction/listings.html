@@ -67,12 +67,18 @@
 
     <h2>Current Listings</h2>
     <table class="table">
-      {% if items %} {% for item in items %} {{item.image}}
+      {% if items %} {% for item in items %}
       <tr>
         <td width="10%" rowspan="2">
-          <img src="{{ item.image.url }}" width="200px" height="200px" />
+          <a href="/auction/listings/{{ item.id }}">
+            <img src="{{ item.image.url }}" width="200px" height="200px" />
+          </a>
         </td>
-        <td width="30%"><h3>{{ item.title }}</h3></td>
+        <td width="30%">
+          <a href="/auction/listings/{{ item.id }}"
+            ><h3>{{ item.title }}</h3></a
+          >
+        </td>
         <td width="20%">{{ item.endDateTime }}</td>
       </tr>
       <tr>
@@ -86,4 +92,6 @@
     <p>there are no items up for bid</p>
     {% endif %}
   </body>
+
+  <script></script>
 </html>

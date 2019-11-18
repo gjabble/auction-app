@@ -85,12 +85,22 @@ def listing(request, itemid):
 def list(request):
     return render(request, 'auction/list.html')
 
+@loggedin
 def bids(request):
     item = Item.objects.get(id=request.POST.get('itemId'))
-    user = UserProfile.objects.get(id = request.POST.get('userId'))
+    user = UserProfile.objects.get(username=request.session['username'])
     amount = request.POST.get('amount')
-    item.price = amount
-    bid = Bid(userProfile=user, item=item, amount=amount,bidDateTime=datetime.datetime.now())
-    bid.save()
-    item.save()
-    return JsonResponse({'message':'successfully added bid'})
+    try:   
+        relevantBids = Bid.objects.filter(item=item)
+        highestBid = relevantBids.latest('amount')
+        if highestBid.amount >= float(amount):
+            return JsonResponse({'error': 'Bid is too low'})
+        item.price = amount
+        bid = Bid(userProfile=user, item=item, amount=amount,bidDateTime=datetime.datetime.now())
+        bid.save()
+        item.save()
+        return redirect('listing', itemid=item.id)
+    except:
+        firstBid = Bid(userProfile=user, item=item, amount=amount,bidDateTime=datetime.datetime.now())
+        firstBid.save()
+        return redirect('listing', itemid=item.id)
