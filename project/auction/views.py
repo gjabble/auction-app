@@ -56,20 +56,21 @@ def logout(request):
 
 def listings(request):
     if request.method == 'POST':
+        user = UserProfile.objects.get(username=request.session['username'])
         title = request.POST.get('title')
         description = request.POST.get('description')
-        image = request.POST.get('image')
-        dateTime = request.POST.get('dateTime')
+        image = request.FILES.get('image')
+        dateTime = request.POST.get('datetime')
         price = request.POST.get('price')
-        # TODO - FIX UserProfile TO BE SET TO USER THAT REQUEST LISTINGS
-        item = Item(title=title, description=description, image=image, endDateTime=dateTime, userProfile=UserProfile.objects.get(pk=1), price=price)
+        item = Item(title=title, description=description, image=image, endDateTime=dateTime, userProfile=user, price=price)
         item.save()
         return JsonResponse({'itemId': item.id})
-    items = Item.objects.all()
-    context = {
-        'items': items
-    }
-    return render(request, 'auction/listings.html', context)
+    elif request.method == 'GET':
+        items = Item.objects.all()
+        context = {
+            'items': items
+        }
+        return render(request, 'auction/listings.html', context)
 
 def listing(request, itemid):
     item = Item.objects.get(pk=itemid)
@@ -84,12 +85,22 @@ def listing(request, itemid):
 def list(request):
     return render(request, 'auction/list.html')
 
+@loggedin
 def bids(request):
     item = Item.objects.get(id=request.POST.get('itemId'))
-    user = UserProfile.objects.get(id = request.POST.get('userId'))
+    user = UserProfile.objects.get(username=request.session['username'])
     amount = request.POST.get('amount')
-    item.price = amount
-    bid = Bid(userProfile=user, item=item, amount=amount,bidDateTime=datetime.datetime.now())
-    bid.save()
-    item.save()
-    return JsonResponse({'message':'successfully added bid'})
+    try:   
+        relevantBids = Bid.objects.filter(item=item)
+        highestBid = relevantBids.latest('amount')
+        if highestBid.amount >= float(amount):
+            return JsonResponse({'error': 'Bid is too low'})
+        item.price = amount
+        bid = Bid(userProfile=user, item=item, amount=amount,bidDateTime=datetime.datetime.now())
+        bid.save()
+        item.save()
+        return redirect('listing', itemid=item.id)
+    except:
+        firstBid = Bid(userProfile=user, item=item, amount=amount,bidDateTime=datetime.datetime.now())
+        firstBid.save()
+        return redirect('listing', itemid=item.id)

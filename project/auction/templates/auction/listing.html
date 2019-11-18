@@ -64,6 +64,7 @@
         </ul>
       </div>
     </nav>
+
     {% if item %}
     <ul id="item" itemid="{{item.id}}">
       <li>{{ item.title }}</li>
@@ -71,7 +72,9 @@
       <img src="{{ item.image.url }}" width="200px" height="200px" />
       <li>{{ item.endDateTime }}</li>
       <li>{{ item.userProfile }}</li>
+      <li>Highest Bid: {{ item.price }}</li>
     </ul>
+    {% if request.session.username %}
     <input
       id="bid-amount"
       type="number"
@@ -79,14 +82,20 @@
       value="{{ item.price }}"
     />
     <button type="button" name="button" onclick="bidOnItem()">Bid</button>
+    <br /><br />
     {% else %}
+    <a href="/auction/login">Login to Bid</a>
+    {% endif %} {% else %}
     <p>item doesnt exist</p>
     {% endif %} {% if bids %}
-    <br /><br />
+
     <h3>Bids on this Item</h3>
     <ul>
       {% for bid in bids %}
-      <li>Bidder: {{bid.userProfile.email}} Amount: {{bid.amount}}</li>
+      <li>
+        Bidder: {{bid.userProfile.email}} Amount: {{bid.amount}} Time:
+        {{bid.bidDateTime}}
+      </li>
       {% endfor %}
     </ul>
     {% endif %}
@@ -106,8 +115,7 @@
           },
           data: {
             itemId: $("#item").attr("itemid"),
-            amount: $("#bid-amount").val(),
-            userId: 1
+            amount: $("#bid-amount").val()
           },
           success: handleBidResp,
           error: handleBidErr
