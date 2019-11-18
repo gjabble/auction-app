@@ -65,7 +65,7 @@
       </div>
     </nav>
     <h3>List an item</h3>
-    <form>
+    <form id="item-form">
       Title:
       <input id="title" type="text" name="title" value="title" /><br /><br />
       Description:
@@ -76,13 +76,7 @@
         value="description"
       /><br /><br />
       Upload Image:
-      <input
-        id="image"
-        type="file"
-        name="image"
-        value="image"
-        src="~/media/gallery/"
-      /><br /><br />
+      <input id="image" type="file" name="image" /><br /><br />
       End Date and Time:
       <input
         id="endDateTime"
@@ -104,19 +98,16 @@
 
       function listItem() {
         let csrf = $("input[name=csrfmiddlewaretoken]").val();
+        let data = new FormData($("#item-form")[0]);
         $.ajax({
           url: "/auction/listings/",
           type: "post",
           headers: {
             "X-CSRFToken": getCookie("csrftoken")
           },
-          data: {
-            title: $("#title").val(),
-            description: $("#description").val(),
-            image: $("#image").val(),
-            dateTime: $("#endDateTime").val(),
-            price: $("#price").val()
-          },
+          data: data,
+          processData: false,
+          contentType: false,
           success: handleListResp,
           error: handleListError
         });

@@ -56,20 +56,21 @@ def logout(request):
 
 def listings(request):
     if request.method == 'POST':
+        user = UserProfile.objects.get(username=request.session['username'])
         title = request.POST.get('title')
         description = request.POST.get('description')
-        image = request.POST.get('image')
-        dateTime = request.POST.get('dateTime')
+        image = request.FILES.get('image')
+        dateTime = request.POST.get('datetime')
         price = request.POST.get('price')
-        # TODO - FIX UserProfile TO BE SET TO USER THAT REQUEST LISTINGS
-        item = Item(title=title, description=description, image=image, endDateTime=dateTime, userProfile=UserProfile.objects.get(pk=1), price=price)
+        item = Item(title=title, description=description, image=image, endDateTime=dateTime, userProfile=user, price=price)
         item.save()
         return JsonResponse({'itemId': item.id})
-    items = Item.objects.all()
-    context = {
-        'items': items
-    }
-    return render(request, 'auction/listings.html', context)
+    elif request.method == 'GET':
+        items = Item.objects.all()
+        context = {
+            'items': items
+        }
+        return render(request, 'auction/listings.html', context)
 
 def listing(request, itemid):
     item = Item.objects.get(pk=itemid)
