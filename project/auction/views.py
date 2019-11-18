@@ -29,28 +29,46 @@ def register(request):
     user.save()
     return render(request, 'auction/login.html')
 
+# def login(request):
+#     if(request.method == 'GET'):
+#         return render(request, 'auction/login.html')
+#     else:
+#         username = request.POST['username']
+#         password = request.POST['password']
+#
+#         try:
+#             user = UserProfile.objects.get(username=username)
+#             if user.password == password:
+#                 request.session['username'] = username
+#                 request.session['password'] = password
+#                 return JsonResponse({'message': 'successfully logged in'})
+#             else:
+#                 return JsonResponse({'message': 'Invalid username or password'})
+#         except UserProfile.DoesNotExist:
+#             return JsonResponse({'message': "Invalid username or password"})
+
 def login(request):
     if(request.method == 'GET'):
         return render(request, 'auction/login.html')
-    else:
-        username = request.POST['username']
-        password = request.POST['password']
 
+    elif(request.method == 'POST'):
         try:
-            user = UserProfile.objects.get(username=username)
-            if user.password == password:
+            username = request.POST['username']
+            password = request.POST['password']
+            user = UserProfile.objects.get(username = username)
+            if password == user.password:
                 request.session['username'] = username
-                request.session['password'] = password
-                return JsonResponse({'message': 'successfully logged in'})
+                return JsonResponse({'message': 'Success', 'username': username, 'loggedin': True})
             else:
                 return JsonResponse({'message': 'Invalid username or password'})
         except UserProfile.DoesNotExist:
-            return JsonResponse({'message': "Invalid username or password"})
+            return JsonResponse({'message': 'Invalid username or password'})
 
 def logout(request):
     request.session.flush()
     return render(request,'auction/login.html')
 
+@loggedin
 def listings(request):
     if request.method == 'POST':
         title = request.POST.get('title')
@@ -68,7 +86,7 @@ def listings(request):
     }
     return render(request, 'auction/listings.html', context)
 
-@loggedin
+# @loggedin
 def listing(request, itemid):
     item = Item.objects.get(pk=itemid)
     bids = Bid.objects.filter(item = itemid);
