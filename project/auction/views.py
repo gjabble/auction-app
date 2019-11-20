@@ -23,7 +23,7 @@ def register(request):
     if request.method == 'GET':
         return render(request, 'auction/register.html')
     if request.method == 'POST':
-        try:        
+        try:
             username = request.POST.get('username')
             password = request.POST.get('password')
             email = request.POST.get('email')
@@ -82,28 +82,58 @@ def listing(request, itemid):
     return render(request, 'auction/listing.html', context)
 
 @loggedin
-def list(request):
+def listBid(request):
     return render(request, 'auction/list.html')
 
-@loggedin
-def bids(request):
-    item = Item.objects.get(id=request.POST.get('itemId'))
-    user = UserProfile.objects.get(username=request.session['username'])
-    amount = request.POST.get('amount')
-    try:   
+# create a bid
+# get all Bids?
+
+# get all bids for specific item
+# get
+
+
+# change listings/itemid to use ajax request to refresh page
+# update layout to use bootstrap
+# if the listing is finished , top bid can buy
+# can no longer bid on item if listing finished
+# if listing finished item state updated
+
+# @loggedin
+def bid(request, itemid):
+    if request.method == 'GET':
+        item = Item.objects.get(id=itemid)
         relevantBids = Bid.objects.filter(item=item)
-        highestBid = relevantBids.latest('amount')
-        if highestBid.amount >= float(amount):
-            return JsonResponse({'error': 'Bid is too low'})
-        item.price = amount
-        bid = Bid(userProfile=user, item=item, amount=amount,bidDateTime=datetime.datetime.now())
-        bid.save()
-        item.save()
-        return redirect('listing', itemid=item.id)
-    except:
-        firstBid = Bid(userProfile=user, item=item, amount=amount,bidDateTime=datetime.datetime.now())
-        firstBid.save()
-        return redirect('listing', itemid=item.id)
+        data = []
+        for bid in relevantBids:
+            user = UserProfile.objects.get(pk=bid.userProfile)
+            biddata = {
+                'amount': bid.amount,
+                'username': user.username
+            }
+            data.append(biddata)
+        return JsonResponse(data, safe=False)
+
+def bids(request):
+    if request.method == 'POST':
+        item = Item.objects.get(id=request.POST.get('itemId'))
+        user = UserProfile.objects.get(username=request.session['username'])
+        amount = request.POST.get('amount')
+        try:
+            relevantBids = Bid.objects.filter(item=item)
+            highestBid = relevantBids.latest('amount')
+            if highestBid.amount >= float(amount):
+                return JsonResponse({'error': 'Bid is too low'})
+            item.price = amount
+            bid = Bid(userProfile=user, item=item, amount=amount,bidDateTime=datetime.datetime.now())
+            bid.save()
+            item.save()
+            return JsonResponse({'success': 'successfully created bid'})
+        except:
+            firstBid = Bid(userProfile=user, item=item, amount=amount,bidDateTime=datetime.datetime.now())
+            firstBid.save()
+            item.price = amount
+            item.save()
+            return JsonResponse({'success': 'successfully created bid'})
 
 @loggedin
 def profile(request):
@@ -113,5 +143,4 @@ def profile(request):
         'user': user,
         'bids': bids
     }
-    print(context)
     return render(request, 'auction/profile.html', context)

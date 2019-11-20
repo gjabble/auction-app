@@ -92,21 +92,58 @@
     <a href="/auction/login">Login to Bid</a>
     {% endif %} {% else %}
     <p>item doesnt exist</p>
-    {% endif %} {% if bids %}
-
-    <h3>Bids on this Item</h3>
-    <ul>
-      {% for bid in bids %}
-      <li>
-        Bidder: {{bid.userProfile.email}} Amount: {{bid.amount}} Time:
-        {{bid.bidDateTime}}
-      </li>
-      {% endfor %}
-    </ul>
     {% endif %}
 
+    <h3>Bids on this Item</h3>
+
+    <div id='bids-list'>
+
+    </div>
+
     <script type="text/javascript">
-      function handleBidResp(resp) {}
+      function handleBidResp(resp) {
+        $.ajax({
+          url: '/auction/bids/' + $("#item").attr("itemid"),
+          type: "GET",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken")
+          },
+          data: {
+            itemId: $("#item").attr("itemid"),
+            amount: $("#bid-amount").val()
+          },
+          success: handleGETBidsResp,
+          error: handleGETBidsErr
+        });
+      }
+
+      let csrf = $("input[name=csrfmiddlewaretoken]").val();
+      $.ajax({
+        url: '/auction/bids/' + $("#item").attr("itemid"),
+        type: "GET",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken")
+        },
+        data: {
+          itemId: $("#item").attr("itemid"),
+          amount: $("#bid-amount").val()
+        },
+        success: handleGETBidsResp,
+        error: handleGETBidsErr
+      });
+
+      function handleGETBidsResp(resp) {
+        $('#bids-list').html('')
+        for(const data of resp){
+          let element = $("<p>" +data.username + " " + data.amount + "</p>");
+          $('#bids-list').append(element);
+
+        }
+      }
+
+      function handleGETBidsErr(e){
+        console.log(e);
+      }
 
       function handleBidErr(err) {}
 

@@ -9,7 +9,8 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('login/', views.login, name='login'),
     path('logout/', views.logout, name='logout'),
-    path('list/', views.list, name='list'),
+    path('list/', views.listBid, name='list'),
     path('bids/', views.bids, name='bids'),
-    path('profile/', views.profile, name='profile')
+    path('profile/', views.profile, name='profile'),
+    path('bids/<int:itemid>', views.bid, name='bid'),
 ]
