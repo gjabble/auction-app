@@ -104,3 +104,14 @@ def bids(request):
         firstBid = Bid(userProfile=user, item=item, amount=amount,bidDateTime=datetime.datetime.now())
         firstBid.save()
         return redirect('listing', itemid=item.id)
+
+@loggedin
+def profile(request):
+    user = UserProfile.objects.get(username=request.session['username'])
+    bids = Bid.objects.filter(userProfile=user)
+    context = {
+        'user': user,
+        'bids': bids
+    }
+    print(context)
+    return render(request, 'auction/profile.html', context)
