@@ -63,8 +63,28 @@
       </div>
     </nav>
     User: {{user.email}} Username: {{user.username}} DOB: {{user.dob}}
+    <br>
+    OPEN BIDS
     <ul>
-      {% for bid in bids %}
+      {% for bid in openBids %}
+      <li>
+        Bidder: {{bid.userProfile.email}} Amount: {{bid.amount}} Item:
+        {{bid.item.title}}
+      </li>
+      {% endfor %}
+    </ul>
+    LOSING BIDS
+    <ul>
+      {% for bid in lostBids %}
+      <li>
+        Bidder: {{bid.userProfile.email}} Amount: {{bid.amount}} Item:
+        {{bid.item.title}}
+      </li>
+      {% endfor %}
+    </ul>
+    WINNING BIDS
+    <ul>
+      {% for bid in winningBids %}
       <li>
         Bidder: {{bid.userProfile.email}} Amount: {{bid.amount}} Item:
         {{bid.item.title}}
