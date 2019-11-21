@@ -84,7 +84,7 @@
       <li>Winning Bidder: {{ winner.username }}</li>
       <li>Winning Bid: {{ item.price }}</li>
       {% else %}
-      <li>Highest Bid: {{ item.price }}</li>
+      <li id="highest-bid-value">Highest Bid: {{ item.price }}</li>
       {% endif %}
     </ul>
     {% if request.session.username %}
@@ -153,11 +153,15 @@
           $('#bids-list').html('There are no bids on this Item');
           return;
         }
+        let highestBid = 0;
         for(const data of resp){
+          if(data.amount > highestBid){
+            highestBid = data.amount;
+          }
           let element = $("<p>" +data.username + " " + data.amount + "</p>");
           $('#bids-list').append(element);
-
         }
+        $('#highest-bid-value').html(highestBid);
       }
 
       function handleGETBidsErr(e){

@@ -117,7 +117,7 @@ def bids(request):
     if request.method == 'POST':
         item = Item.objects.get(id=request.POST.get('itemId'))
         # CHECK IF ITEM EXPIRED
-        if item.endDateTime < datetime.datetime.now():
+        if item.endDateTime.replace(tzinfo=None) < datetime.datetime.now():
             return JsonResponse({'error': 'This item has expired'})
         user = UserProfile.objects.get(username=request.session['username'])
         amount = request.POST.get('amount')
