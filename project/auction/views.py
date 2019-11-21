@@ -92,12 +92,6 @@ def listing(request, itemid):
 def listBid(request):
     return render(request, 'auction/list.html')
 
-# change listings/itemid to use ajax request to refresh page - DONE
-# update layout to use bootstrap
-# if the listing is finished , top bid can buy
-# can no longer bid on item if listing finished
-# if listing finished item state updated
-
 def bid(request, itemid):
     if request.method == 'GET':
         item = Item.objects.get(id=itemid)
@@ -116,7 +110,6 @@ def bid(request, itemid):
 def bids(request):
     if request.method == 'POST':
         item = Item.objects.get(id=request.POST.get('itemId'))
-        # CHECK IF ITEM EXPIRED
         if item.endDateTime.replace(tzinfo=None) < datetime.datetime.now():
             return JsonResponse({'error': 'This item has expired'})
         user = UserProfile.objects.get(username=request.session['username'])
@@ -132,6 +125,8 @@ def bids(request):
             item.save()
             return JsonResponse({'success': 'successfully created bid'})
         except:
+            if float(amount) <= item.price:
+                return JsonResponse({'error': 'bid below starting price'})
             firstBid = Bid(userProfile=user, item=item, amount=amount,bidDateTime=datetime.datetime.now())
             firstBid.save()
             item.price = amount
