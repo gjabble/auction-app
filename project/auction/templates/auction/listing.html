@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Login</title>
+    <title>Listing: {{ item.title }}</title>
     <link
       rel="stylesheet"
       type="text/css"
@@ -71,13 +71,21 @@
     </nav>
 
     {% if item %}
+    {% if expired %}
+    <h1>THIS ITEM HAS EXPIRED</h1>
+    {% endif %}
     <ul id="item" itemid="{{item.id}}">
       <li>{{ item.title }}</li>
       <li>{{ item.description }}</li>
       <img src="{{ item.image.url }}" width="200px" height="200px" />
       <li>{{ item.endDateTime }}</li>
       <li>{{ item.userProfile }}</li>
-      <li>Highest Bid: {{ item.price }}</li>
+      {% if expired and winner %}
+      <li>Winning Bidder: {{ winner.username }}</li>
+      <li>Winning Bid: {{ item.price }}</li>
+      {% else %}
+      <li id="highest-bid-value">Highest Bid: {{ item.price }}</li>
+      {% endif %}
     </ul>
     {% if request.session.username %}
     <input
@@ -85,8 +93,14 @@
       type="number"
       name="number"
       value="{{ item.price }}"
+      max="999999.99"
     />
+    {% if expired %}
+    <button type="button" name="button" onclick="bidOnItem()" disabled>Bid</button>
+    {% else %}
     <button type="button" name="button" onclick="bidOnItem()">Bid</button>
+    {% endif %}
+    <div id="error"></div>
     <br /><br />
     {% else %}
     <a href="/auction/login">Login to Bid</a>
@@ -96,12 +110,14 @@
 
     <h3>Bids on this Item</h3>
 
-    <div id='bids-list'>
-
-    </div>
+    <div id='bids-list'></div>
 
     <script type="text/javascript">
       function handleBidResp(resp) {
+        if(resp.error){
+          $('#error').html(resp.error)
+          return;
+        }
         $.ajax({
           url: '/auction/bids/' + $("#item").attr("itemid"),
           type: "GET",
@@ -133,21 +149,32 @@
       });
 
       function handleGETBidsResp(resp) {
-        $('#bids-list').html('')
+        $('#bids-list').html('');
+        if(!resp.length){
+          $('#bids-list').html('There are no bids on this Item');
+          return;
+        }
+        let highestBid = 0;
         for(const data of resp){
+          if(data.amount > highestBid){
+            highestBid = data.amount;
+          }
           let element = $("<p>" +data.username + " " + data.amount + "</p>");
           $('#bids-list').append(element);
-
         }
+        $('#highest-bid-value').html(highestBid);
       }
 
       function handleGETBidsErr(e){
         console.log(e);
       }
 
-      function handleBidErr(err) {}
+      function handleBidErr(err) {
+        console.log(err);
+      }
 
       function bidOnItem() {
+        $('#error').html('');
         let csrf = $("input[name=csrfmiddlewaretoken]").val();
         $.ajax({
           url: "/auction/bids/",

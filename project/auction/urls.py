@@ -13,4 +13,5 @@ urlpatterns = [
     path('bids/', views.bids, name='bids'),
     path('profile/', views.profile, name='profile'),
     path('bids/<int:itemid>', views.bid, name='bid'),
+    path('expired-listings/', views.expired, name='expired')
 ]

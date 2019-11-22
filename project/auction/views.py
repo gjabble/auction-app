@@ -11,13 +11,13 @@ from django.shortcuts import redirect
 def index(request):
     return render(request, 'auction/index.html')
 
-def loggedin(view):
-    def check_loggedin(request):
+def loginRequired(view):
+    def checkRequestLogin(request):
         if 'username' in request.session:
             return view(request)
         else:
             return redirect('/auction/login')
-    return check_loggedin
+    return checkRequestLogin
 
 def register(request):
     if request.method == 'GET':
@@ -66,7 +66,7 @@ def listings(request):
         item.save()
         return JsonResponse({'itemId': item.id})
     elif request.method == 'GET':
-        items = Item.objects.all()
+        items = Item.objects.filter(endDateTime__gt=datetime.datetime.now())
         context = {
             'items': items
         }
@@ -74,31 +74,24 @@ def listings(request):
 
 def listing(request, itemid):
     item = Item.objects.get(pk=itemid)
-    bids = Bid.objects.filter(item = itemid);
+    expired = item.endDateTime.replace(tzinfo=None) < datetime.datetime.now()
     context = {
         'item': item,
-        'bids': bids
+        'expired': expired,
     }
+    if expired == True:
+        try:
+            winningBid = Bid.objects.filter(item=item).latest('amount')
+            winner = UserProfile.objects.get(pk=winningBid.userProfile)
+            context['winner'] = winner
+        except:
+            return render(request, 'auction/listing.html', context)
     return render(request, 'auction/listing.html', context)
 
-@loggedin
+@loginRequired
 def listBid(request):
     return render(request, 'auction/list.html')
 
-# create a bid
-# get all Bids?
-
-# get all bids for specific item
-# get
-
-
-# change listings/itemid to use ajax request to refresh page
-# update layout to use bootstrap
-# if the listing is finished , top bid can buy
-# can no longer bid on item if listing finished
-# if listing finished item state updated
-
-# @loggedin
 def bid(request, itemid):
     if request.method == 'GET':
         item = Item.objects.get(id=itemid)
@@ -113,9 +106,12 @@ def bid(request, itemid):
             data.append(biddata)
         return JsonResponse(data, safe=False)
 
+@loginRequired
 def bids(request):
     if request.method == 'POST':
         item = Item.objects.get(id=request.POST.get('itemId'))
+        if item.endDateTime.replace(tzinfo=None) < datetime.datetime.now():
+            return JsonResponse({'error': 'This item has expired'})
         user = UserProfile.objects.get(username=request.session['username'])
         amount = request.POST.get('amount')
         try:
@@ -129,18 +125,44 @@ def bids(request):
             item.save()
             return JsonResponse({'success': 'successfully created bid'})
         except:
+            if float(amount) <= item.price:
+                return JsonResponse({'error': 'bid below starting price'})
             firstBid = Bid(userProfile=user, item=item, amount=amount,bidDateTime=datetime.datetime.now())
             firstBid.save()
             item.price = amount
             item.save()
             return JsonResponse({'success': 'successfully created bid'})
 
-@loggedin
+@loginRequired
 def profile(request):
     user = UserProfile.objects.get(username=request.session['username'])
     bids = Bid.objects.filter(userProfile=user)
+    openBids = []
+    winningBids = []
+    lostBids = []
+    for bid in bids:
+        item = Item.objects.get(pk=bid.item.pk)
+        if item.endDateTime.replace(tzinfo=None) < datetime.datetime.now():
+            itemBids = Bid.objects.filter(item=item)
+            if itemBids.latest('amount') == bid:
+                winningBids.append(bid)
+            else:
+                lostBids.append(bid)
+        else:
+            openBids.append(bid)
+
     context = {
         'user': user,
-        'bids': bids
+        'openBids': openBids,
+        'lostBids': lostBids,
+        'winningBids': winningBids
     }
     return render(request, 'auction/profile.html', context)
+
+@loginRequired
+def expired(request):
+    expiredItems = Item.objects.filter(endDateTime__lt=datetime.datetime.now())
+    context = {
+        'items': expiredItems
+    }
+    return render(request, 'auction/expired.html', context)
