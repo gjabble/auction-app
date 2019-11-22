@@ -1,74 +1,7 @@
+{% extends "auction/index.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Login</title>
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{% static 'auction/login.css' %}"
-    />
-    <link
-      href="https://fonts.googleapis.com/css?family=Roboto:400,900"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-    />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="/auction/">Auction App</a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
+    {% block content %}
 
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="/auction/listings"
-              >Listings <span class="sr-only">(current)</span></a
-            >
-          </li>
-
-          {% if request.session.username is None %}
-          <li class="nav-item">
-            <a class="nav-link" href="/auction/login"
-              >Log In <span class="sr-only">(current)</span></a
-            >
-          </li>
-          {% else %}
-          <li class="nav-item">
-            <a class="nav-link" href="/auction/list"
-              >Post Item <span class="sr-only">(current)</span></a
-            >
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/auction/logout"
-              >Log Out <span class="sr-only">(current)</span></a
-            >
-          </li>
-          <li class="nav-item">
-              <a class="nav-link" href="/auction/profile"
-                >Profile <span class="sr-only">(current)</span></a
-              >
-            </li
-          {% endif %}
-        </ul>
-      </div>
-    </nav>
     <div class="container jumbotron">
       <div class="panel">
         <br />
@@ -143,5 +76,5 @@
         });
       });
     </script>
-  </body>
-</html>
+
+    {% endblock %}

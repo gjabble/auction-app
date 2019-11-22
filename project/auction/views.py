@@ -9,7 +9,7 @@ import datetime
 from django.shortcuts import redirect
 
 def index(request):
-    return render(request, 'auction/index.html')
+    return redirect('/auction/listings')
 
 def loginRequired(view):
     def checkRequestLogin(request):
@@ -53,6 +53,17 @@ def login(request):
 def logout(request):
     request.session.flush()
     return redirect('/auction/login')
+
+def searchListings(request):
+    search = request.GET.get('search')
+    if search == '':
+        items = Item.objects.filter(endDateTime__gt=datetime.datetime.now())
+        results = serializers.serialize('json', items)
+        return JsonResponse(results, safe=False)
+    items = Item.objects.filter(endDateTime__gt=datetime.datetime.now())
+    searchresults = items.filter(title__contains=search)
+    results = serializers.serialize('json', searchresults)
+    return JsonResponse(results, safe=False)
 
 def listings(request):
     if request.method == 'POST':
@@ -110,9 +121,11 @@ def bid(request, itemid):
 def bids(request):
     if request.method == 'POST':
         item = Item.objects.get(id=request.POST.get('itemId'))
+        user = UserProfile.objects.get(username=request.session['username'])
+        if item.userProfile == user:
+            return JsonResponse({'error': 'You can not bid on your own listing'})
         if item.endDateTime.replace(tzinfo=None) < datetime.datetime.now():
             return JsonResponse({'error': 'This item has expired'})
-        user = UserProfile.objects.get(username=request.session['username'])
         amount = request.POST.get('amount')
         try:
             relevantBids = Bid.objects.filter(item=item)
@@ -159,7 +172,6 @@ def profile(request):
     }
     return render(request, 'auction/profile.html', context)
 
-@loginRequired
 def expired(request):
     expiredItems = Item.objects.filter(endDateTime__lt=datetime.datetime.now())
     context = {
