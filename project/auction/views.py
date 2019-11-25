@@ -7,6 +7,8 @@ import json
 from django.http import QueryDict
 import datetime
 from django.shortcuts import redirect
+from django.core.mail import send_mail
+from django.conf import settings
 
 def index(request):
     return redirect('/auction/listings')
@@ -132,12 +134,24 @@ def bids(request):
             highestBid = relevantBids.latest('amount')
             if highestBid.amount >= float(amount):
                 return JsonResponse({'error': 'Bid is too low'})
+
+            previousBidder = UserProfile.objects.get(pk=highestBid.userProfile)
+            if not previousBidder == user:
+                previousBidderEmail = previousBidder.email
+                subject = "You've been outbid on " + item.title
+                message = "You've been outbid on " + item.title + " at " + amount + " " + " http://" + request.get_host() + "/auction/listings/" + str(item.id)
+                email_from = settings.EMAIL_HOST_USER
+                recipient_list = previousBidderEmail
+                send_mail(subject, message, email_from, [recipient_list], fail_silently=False)
+
             item.price = amount
             bid = Bid(userProfile=user, item=item, amount=amount,bidDateTime=datetime.datetime.now())
             bid.save()
             item.save()
+
             return JsonResponse({'success': 'successfully created bid'})
-        except:
+            
+        except Exception as e:
             if float(amount) <= item.price:
                 return JsonResponse({'error': 'bid below starting price'})
             firstBid = Bid(userProfile=user, item=item, amount=amount,bidDateTime=datetime.datetime.now())

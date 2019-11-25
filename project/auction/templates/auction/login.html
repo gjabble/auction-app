@@ -1,14 +1,15 @@
 {% extends "auction/index.html" %}
 {% load static %}
-    {% block content %}
 
-    <div class="container jumbotron">
+{% block content %}
+
+<div class="card"><div class="card-header"><h3>Login</h3></div></div><br>
+
+    <div class="container jumbotron col-4">
       <div class="panel">
-        <br />
         <form id="login">
           {% csrf_token %}
-          <br />
-          <h5 class="text-muted">Enter your username and passsword</h5>
+          <h5 class="text-muted">Enter Details</h5>
           <div class="form-group">
             <input
               type="text"
@@ -23,26 +24,22 @@
               type="password"
               class="form-control"
               id="passwordInput"
-              placeholder="Password"
+              placeholder="password"
               required
             />
           </div>
-          <br />
           <button type="submit" class="btn btn-primary">Login</button>
-          <br /><br />
-          <span class="text-muted">
-            No Account?
-          </span>
-          <br />
+          <br>
         </form>
-        <a href="{% url 'register' %}"
-          ><button type="button" class="btn btn-primary">Sign up</button></a
-        >
+        <hr>
+        <p>No Account?</p>
+        <a href="{% url 'register' %}"><button type="button" class="btn btn-primary">Sign up</button></a>
       </div>
-
-      <br />
+      <br>
       <div id="error" class="text-danger"></div>
     </div>
+
+
     <script type="text/javascript">
       function handleLoginSuccess(response) {
         if (response.success) {
@@ -77,4 +74,4 @@
       });
     </script>
 
-    {% endblock %}
+{% endblock %}

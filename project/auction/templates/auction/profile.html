@@ -1,35 +1,74 @@
 {% extends "auction/index.html" %}
 {% load static %}
 
-  {% block content %}
-    User: {{user.email}} Username: {{user.username}} DOB: {{user.dob}}
-    <br>
-    OPEN BIDS
-    <ul>
-      {% for bid in openBids %}
-      <li>
-        Bidder: {{bid.userProfile.email}} Amount: {{bid.amount}} Item:
-        {{bid.item.title}}
-      </li>
-      {% endfor %}
-    </ul>
-    LOSING BIDS
-    <ul>
-      {% for bid in lostBids %}
-      <li>
-        Bidder: {{bid.userProfile.email}} Amount: {{bid.amount}} Item:
-        {{bid.item.title}}
-      </li>
-      {% endfor %}
-    </ul>
-    WINNING BIDS
-    <ul>
-      {% for bid in winningBids %}
-      <li>
-        Bidder: {{bid.userProfile.email}} Amount: {{bid.amount}} Item:
-        {{bid.item.title}}
-      </li>
-      {% endfor %}
-    </ul>
+{% block content %}
 
-    {% endblock %}
+<head>
+<link rel="stylesheet" type="text/css" href="{% static '/profile.css' %}"/>
+</head>
+
+<div class="card"><div class="card-header"><h3>{{ user.username }}'s Profile</h3></div></div>
+<br>
+<div class='container-fluid'>
+
+  <ul class="list-group col-12">
+    <li class="list-group-item"><h4>Email Address:</h4> {{ user.email }}</li>
+    <li class="list-group-item"><h4>Username:</h4> {{ user.username }}</li>
+    <li class="list-group-item"><h4>DoB:</h4> {{ user.dob  }}</li>
+  </ul><br>
+
+  <div class="row">
+    <div class="col-sm">
+      <h3>Winning Bids</h3>
+      {% for bid in winningBids %}
+      <div class="list-group">
+        <a href="{% url 'listing' bid.item.id %}" class="list-group-item list-group-item-success flex-column align-items-start">
+          <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1"><b>Title:</b> {{ bid.item.title }}</h5>
+            <small><b>End Date:</b> {{ bid.item.endDateTime }}</small>
+          </div>
+          <p class="mb-1"><b>Description:</b> {{ bid.item.description }}</p>
+          <small><b>Price:</b> £{{ bid.item.price }}</small>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="col-sm">
+      <h3>Losing Bids</h3>
+      {% for bid in lostBids %}
+      <div class="list-group">
+        <a href="{% url 'listing' bid.item.id %}" class="list-group-item list-group-item-danger flex-column align-items-start">
+          <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1"><b>Title:</b> {{ bid.item.title }}</h5>
+            <small><b>End Date:</b> {{ bid.item.endDateTime }}</small>
+          </div>
+          <p class="mb-1"><b>Description:</b> {{ bid.item.description }}</p>
+          <small><b>Price:</b> £{{ bid.item.price }}</small>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="col-sm">
+      <h3>Open Bids</h3>
+      {% for bid in openBids %}
+      <div class="list-group">
+        <a href="{% url 'listing' bid.item.id %}" class="list-group-item list-group-item-primary flex-column align-items-start">
+          <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1"><b>Title:</b> {{ bid.item.title }}</h5>
+            <small><b>End Date:</b> {{ bid.item.endDateTime }}</small>
+          </div>
+          <p class="mb-1"><b>Description:</b> {{ bid.item.description }}</p>
+          <small><b>Price:</b> £{{ bid.item.price }}</small>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <br>
+
+</div>
+
+{% endblock %}

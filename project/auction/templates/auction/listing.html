@@ -1,48 +1,115 @@
 {% extends "auction/index.html" %}
 {% load static %}
-    {% block content %}
+
+{% block content %}
+
+<head>
+<link rel="stylesheet" type="text/css" href="{% static '/listing.css' %}"/>
+</head>
+
+
+
+
+
+
 
     {% if item %}
-    {% if expired %}
-    <h1>THIS ITEM HAS EXPIRED</h1>
-    {% endif %}
-    <ul id="item" itemid="{{item.id}}">
-      <li>{{ item.title }}</li>
-      <li>{{ item.description }}</li>
-      <img src="{{ item.image.url }}" width="200px" height="200px" />
-      <li>{{ item.endDateTime }}</li>
-      <li>{{ item.userProfile }}</li>
-      {% if expired and winner %}
-      <li>Winning Bidder: {{ winner.username }}</li>
-      <li>Winning Bid: {{ item.price }}</li>
-      {% else %}
-      <li id="highest-bid-value">Highest Bid: {{ item.price }}</li>
-      {% endif %}
-    </ul>
-    {% if request.session.username %}
-    <input
-      id="bid-amount"
-      type="number"
-      name="number"
-      value="{{ item.price }}"
-      max="999999.99"
-    />
-    {% if expired %}
-    <button type="button" name="button" onclick="bidOnItem()" disabled>Bid</button>
-    {% else %}
-    <button type="button" name="button" onclick="bidOnItem()">Bid</button>
-    {% endif %}
-    <div id="error"></div>
-    <br /><br />
-    {% else %}
-    <a href="{% url 'login' %}">Login to Bid</a>
-    {% endif %} {% else %}
-    <p>item doesnt exist</p>
+
+      <div id="item" itemid="{{item.id}}" class="card">
+        <div class="card-header">
+          {% if expired %}
+            <h3>Listing: {{ item.title }} - EXPIRED</h3>
+          {% else %}
+            <h3>Listing: {{ item.title }}</h3>
+          {% endif %}
+        </div>
+      </div>
+      <br>
+      <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="card flex-row flex-wrap">
+              <div class="card-header border-0">
+                  <img src="{{ item.image.url }}" class="img-fluid" id="image"/>
+              </div>
+              <div class="card-block px-2">
+                  <h4 class="card-title">{{ item.title }}</h4>
+                  <br>
+                  <p class="card-text"><b>Description: </b>{{ item.description }}</p>
+                  <p class="card-text"><b>End Date/Time: </b>{{ item.endDateTime }}</p>
+                  <p class="card-text"><b>Listed By: </b>{{ item.userProfile.username }}</p>
+                  <br>
+                  <h4><p id="highest-bid" class="card-text"><b>Current Bid: </b> £{{ item.price }}</p></h4>
+                  <br>
+                  <p class="card-text"><b></b>
+              <form class="form-inline">
+              <div class="form-group">
+                {% if not request.session.username %}
+                  <a href="{% url 'login' %}">Log in to bid</a>
+                {% else %}
+
+
+                {% if expired %}
+                <p class="card-text"><b>Place Bid: </b> <input class="form-control"
+                  id="bid-amount"
+                  type="number"
+                  name="number"
+                  value="{{ item.price }}"
+                  max="999999.99"
+                  disabled
+                />
+                  <button type="button" name="button" class="btn btn-primary" onclick="bidOnItem()" disabled>Bid</button></p>
+                  <div id="error"></div>
+                {% else %}
+                <p class="card-text"><b>Place Bid: </b> <input class="form-control"
+                  id="bid-amount"
+                  type="number"
+                  name="number"
+                  value="{{ item.price }}"
+                  max="999999.99"
+                />
+                  <button type="button" name="button" class="btn btn-primary" onclick="bidOnItem()">Bid</button>
+                </p>
+                <div id="error"></div>
+                {% endif %}
+                {% endif %}
+              </div>
+              </form>
+              </div>
+          </div>
+          <br>
+        </div>
+      </div>
+
+    <br>
+
+    {% if expired and winner %}
+    <div class="row">
+      <div class="col-sm">
+        <h3>Winner</h3>
+        <div class="list-group">
+          <div class="list-group-item list-group-item-success flex-column align-items-start col-4">
+            <div class="d-flex w-100 justify-content-between">
+              <h5 class="mb-1"><b>Winning Bidder: </b>{{ winner.username }}</h5>
+            </div>
+            <p class="mb-1"><b>Winning Bid: </b> £{{ item.price }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
     {% endif %}
 
-    <h3>Bids on this Item</h3>
 
-    <div id='bids-list'></div>
+    <h3>Bid History</h3>
+    <div class="row">
+      <div id="bids-list" class="col-sm">
+
+      </div>
+    </div>
+
+    {% endif %}
+    </div>
 
     <script type="text/javascript">
       function handleBidResp(resp) {
@@ -91,10 +158,17 @@
           if(parseFloat(data.amount) > highestBid){
             highestBid = data.amount;
           }
-          let element = $("<p>" +data.username + " " + data.amount + "</p>");
+          let element = $(`<div class="list-group">
+                    <div class="list-group-item list-group-item-info flex-column align-items-start col-4">
+                      <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1"><b>User: </b>${data.username}</h5>
+                      </div>
+                      <p class="mb-1"><b>Amount: £</b> ${data.amount}</p>
+                    </div>
+                  </div>`);
           $('#bids-list').append(element);
         }
-        $('#highest-bid-value').html(highestBid);
+        $('#highest-bid').html(`<b>Current Bid: </b>£${highestBid}`);
       }
 
       function handleGETBidsErr(e){
@@ -142,4 +216,4 @@
       }
     </script>
 
-    {% endblock %}
+{% endblock %}

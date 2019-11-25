@@ -2,38 +2,40 @@
 {% load static %}
 
 {% block content %}
-  <div class="table-responsive">
-  <h2>Current Listings</h2>
+
+<head>
+<link rel="stylesheet" type="text/css" href="{% static '/listings.css' %}"/>
+</head>
+
+<div class="card"><div class="card-header"><h3>Current Listings</h3></div></div><br>
+<div class='container-fluid'>
   <form id="search-form">
-    <div class="form-group">
-      <input id="search-value" class="form-control" type="text" name="search" placeholder="Search">
+    <div class="row">
+      <div class="col-lg"><div class='form-group'><input id="search-value" class="form-control" type="text" name="search" placeholder="Search for anything"></div></div>
+      <div class="col-lg"><button type="submit" class="btn btn-primary">Search</button></div>
     </div>
-    <button type="submit">Search</button>
   </form>
-  <div class="row">
-    <div class="col-12">
-		<table id="listings-table" class="table table-image">
-    {% if items %} {% for item in items %}
-		  <tbody>
-		    <tr>
-		      <th scope="row"></th>
-		      <td class="w-25">
-			      <img src="{{ item.image.url }}" class="img-fluid img-thumbnail" width="250px">
-		      </td>
-		      <td>{{ item.title }}</td>
-		      <td>{{ item.description }}</td>
-		      <td>{{ item.price }}</td>
-		    </tr>
-		  </tbody>
-      {% endfor %}
-		</table>
+  <table class="table table-condensed" id="listings-table">
+    <tbody>
+      {% if items %} {% for item in items %}
+      <tr>
+        <td width="30%" rowspan="2"><a href="{% url 'listing' item.id %}"><img src="{{ item.image.url }}" class="img-fluid img-thumbnail" id='image'></a></td>
+        <td width="40%"><h3><a href="{% url 'listing' item.id %}">{{ item.title }}</a><h3></td>
+        <td>£{{ item.price }}</td>
+      </tr>
+      <tr>
+        <td>{{ item.description }}</td>
+        <td>{{ item.endDateTime }}</td>
+      </tr>
+        {% endfor %}
+      </tbody>
+    </table>
     {% else %}
     <p>No items currently listed</p>
     {% endif %}
-    </div>
-  </div>
 
-</div>
+
+  </div>
 
 
 <script type="text/javascript">
@@ -55,7 +57,7 @@
         $('#listings-table').html('');
         let tabledata = '';
         for(let data of results) {
-          tabledata += `<tbody><tr><th scope="row"></th><td class="w-25"><img src="/media/${data.fields.image}" class="img-fluid img-thumbnail" width="250px"></td><td>${data.fields.title}</td><td>${data.fields.description}</td><td>${data.fields.price}</td></tr></tbody>`;
+          tabledata += `<tbody><tr><td width="30%" rowspan="2"><a href="${window.location.href}${data.pk}"><img src="/media/${data.fields.image}" class="img-fluid img-thumbnail" id='image'></a></td><td width="40%"><h3><a href="${window.location.href}${data.pk}">${data.fields.title}</a><h3></td><td>£${data.fields.price}</td></tr><tr><td>${data.fields.description}</td><td></td></tr></tbody>`
         }
         $('#listings-table').html($(tabledata));
       },

@@ -1,34 +1,32 @@
-
 {% extends "auction/index.html" %}
-
 {% load static %}
+
 {% block content %}
-    <h2>Expired Listings</h2>
-    <table class="table">
+
+<head>
+<link rel="stylesheet" type="text/css" href="{% static '/expired.css' %}"/>
+</head>
+
+<div class="card"><div class="card-header"><h3>Expired Listings</h3></div></div>
+<div class="container-fluid">
+  <table class="table table-condensed">
+    <tbody>
       {% if items %} {% for item in items %}
       <tr>
-        <td width="10%" rowspan="2">
-          <a href="{% url 'listing' item.id %}">
-            <img src="{{ item.image.url }}" width="200px" height="200px" />
-          </a>
-        </td>
-        <td width="30%">
-          <a href="{% url 'listing' item.id %}"
-            ><h3>{{ item.title }}</h3></a
-          >
-        </td>
-        <td width="20%">{{ item.endDateTime }}</td>
+        <td width="30%" rowspan="2"><a href="{% url 'listing' item.id %}"><img src="{{ item.image.url }}" class="img-fluid img-thumbnail" id='image'></a></td>
+        <td width="40%"><h3><a href="{% url 'listing' item.id %}">{{ item.title }}</a><h3></td>
+        <td>{{ item.price }}</td>
       </tr>
       <tr>
         <td>{{ item.description }}</td>
-        <td>£{{ item.price }}</td>
+        <td>{{ item.endDateTime }}</td>
       </tr>
       {% endfor %}
-    </table>
+    </tbody>
+  </table>
+  {% else %}
+  <p>No items currently listed</p>
+  {% endif %}
+</div>
 
-    {% else %}
-    <p>there are no items up for bid</p>
-    {% endif %}
-
-
-    {% endblock %}
+{% endblock %}
