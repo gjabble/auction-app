@@ -1,7 +1,72 @@
 {% extends "auction/index.html" %}
-    {% block content %}
-      {% for item in items %}
-        <p>{{item.item.title}}</p>
-        <img src="{{item.item.image.url}}" alt="">
-      {% endfor %}
-    {% endblock %}
+{% load static %}
+
+{% block content %}
+
+<div class="card"><div class="card-header"><h3>Your Basket</h3></div></div>
+
+<br>
+<div class="container-fluid">
+  <div class="row justify-content-md-center">
+      <div class="col-12 col-md-10 col-md-offset-1">
+          <table class="table table-hover">
+              <thead>
+                  <tr>
+                      <th>Product</th>
+                      <th class="text-center">Price</th>
+                      <th></th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for item in items %}
+                  <tr>
+                      <td class="col-sm-8 col-md-6">
+                      <div class="media">
+                          <a class="thumbnail pull-left" href="{% url 'listing' item.item.id %}"> <img class="media-object" src="{{item.item.image.url}}" style="width: 90px; height: 90px;"></a>
+                          <div class="media-body">
+                              <h4 style="padding-left:10px" class="media-heading"><a href="{% url 'listing' item.item.id %}">{{ item.item.title }}</a></h4>
+                              <h5 style="padding-left:10px" class="media-heading">{{ item.item.description}}</h5>
+                          </div>
+                      </div></td>
+
+                      <td class="col-sm-1 col-md-1 text-center"><strong>£{{ item.item.price }}</strong></td>
+                      <td class="col-sm-1 col-md-1">
+                      <button type="button" class="btn btn-danger">
+                          <span class="glyphicon glyphicon-remove"></span> Remove
+                      </button></td>
+                  </tr>
+                  {% endfor %}
+                  <tr>
+                      <td></td>
+                      <td><h5>Subtotal</h5></td>
+                      <td class="text-right">
+                        <h5><strong>
+                        {{ item.item.price }}
+                        </strong></h5></td>
+                  </tr>
+                  <tr>
+                      <td></td>
+                      <td><h5>Shipping</h5></td>
+                      <td class="text-right">{{ item.item.price }}<h5><strong></strong></h5></td>
+                  </tr>
+                  <tr>
+                      <td></td>
+                      <td><h3>Total</h3></td>
+                      <td class="text-right"><h3><strong>£{{ item.item.price }}</strong></h3></td>
+                  </tr>
+                  <tr>
+                      <td></td>
+                      <td></td>
+                      <td>
+                        <button type="button" class="btn btn-success">
+                          Checkout <span class="glyphicon glyphicon-play"></span>
+                        </button>
+                      </td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
+  </div>
+</div>
+
+{% endblock %}
