@@ -1,0 +1,7 @@
+{% extends "auction/index.html" %}
+    {% block content %}
+      {% for item in items %}
+        <p>{{item.item.title}}</p>
+        <img src="{{item.item.image.url}}" alt="">
+      {% endfor %}
+    {% endblock %}

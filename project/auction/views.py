@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Item, UserProfile, Bid
+from .models import Item, UserProfile, Bid, BasketItem
 from django.http import JsonResponse
 from django.core import serializers
 from django.forms.models import model_to_dict
@@ -69,13 +69,19 @@ def searchListings(request):
 
 def listings(request):
     if request.method == 'POST':
+        print(request.POST)
         user = UserProfile.objects.get(username=request.session['username'])
         title = request.POST.get('title')
         description = request.POST.get('description')
         image = request.FILES.get('image')
         dateTime = request.POST.get('datetime')
         price = request.POST.get('price')
-        item = Item(title=title, description=description, image=image, endDateTime=dateTime, userProfile=user, price=price)
+        auction = request.POST.get('auction')
+        if(auction == 'false'):
+            auction = False
+        else:
+            auction = True
+        item = Item(title=title, description=description, image=image, endDateTime=dateTime, userProfile=user, price=price, auction=auction)
         item.save()
         return JsonResponse({'itemId': item.id})
     elif request.method == 'GET':
@@ -150,7 +156,7 @@ def bids(request):
             item.save()
 
             return JsonResponse({'success': 'successfully created bid'})
-            
+
         except Exception as e:
             if float(amount) <= item.price:
                 return JsonResponse({'error': 'bid below starting price'})
@@ -192,3 +198,17 @@ def expired(request):
         'items': expiredItems
     }
     return render(request, 'auction/expired.html', context)
+
+@loginRequired
+def basket(request):
+    if request.method == 'POST':
+        item = Item.objects.get(pk=request.POST.get('itemId'))
+        user = UserProfile.objects.get(username=request.session['username'])
+        # if(item IS IN THE BASKET):
+        basketitem = BasketItem(userProfile=user, item=item)
+        basketitem.save()
+        return JsonResponse({'success':'successfully added to basket'})
+    else:
+        user = UserProfile.objects.get(username=request.session['username'])
+        basket = BasketItem.objects.filter(userProfile=user)
+        return render(request, 'auction/basket.html', {'items':basket})

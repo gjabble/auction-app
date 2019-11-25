@@ -6,13 +6,6 @@
 <head>
 <link rel="stylesheet" type="text/css" href="{% static '/listing.css' %}"/>
 </head>
-
-
-
-
-
-
-
     {% if item %}
 
       <div id="item" itemid="{{item.id}}" class="card">
@@ -39,7 +32,11 @@
                   <p class="card-text"><b>End Date/Time: </b>{{ item.endDateTime }}</p>
                   <p class="card-text"><b>Listed By: </b>{{ item.userProfile.username }}</p>
                   <br>
+                  {% if item.auction %}
                   <h4><p id="highest-bid" class="card-text"><b>Current Bid: </b> £{{ item.price }}</p></h4>
+                  {% else %}
+                  <h4><p id="highest-bid" class="card-text"><b>Price: </b> £{{ item.price }}</p></h4>
+                  {% endif %}
                   <br>
                   <p class="card-text"><b></b>
               <form class="form-inline">
@@ -48,6 +45,7 @@
                   <a href="{% url 'login' %}">Log in to bid</a>
                 {% else %}
 
+                {% if item.auction %}
 
                 {% if expired %}
                 <p class="card-text"><b>Place Bid: </b> <input class="form-control"
@@ -71,6 +69,13 @@
                   <button type="button" name="button" class="btn btn-primary" onclick="bidOnItem()">Bid</button>
                 </p>
                 <div id="error"></div>
+                {% endif %}
+                {% else %}
+                  {% if expired %}
+                    <button type="button" name="button" class="btn btn-primary" disabled>Add to basket</button>
+                  {% else %}
+                    <button type="button" name="button" class="btn btn-primary" onclick="addToBasket()">Add to basket</button>
+                  {% endif %}
                 {% endif %}
                 {% endif %}
               </div>
@@ -100,18 +105,46 @@
     <br>
     {% endif %}
 
-
+    {% if item.auction %}
     <h3>Bid History</h3>
     <div class="row">
       <div id="bids-list" class="col-sm">
 
       </div>
     </div>
+    {% endif %}
+
 
     {% endif %}
     </div>
 
     <script type="text/javascript">
+
+      function handleBasketResp(resp) {
+        console.log(resp);
+      }
+
+      function handleBasketErr(err) {
+        console.log(err);
+      }
+
+      function addToBasket() {
+          let csrf = $("input[name=csrfmiddlewaretoken]").val();
+          $.ajax({
+            url: '/auction/basket/',
+            type: "POST",
+            headers: {
+              "X-CSRFToken": getCookie("csrftoken")
+            },
+            data: {
+              itemId: $("#item").attr("itemid"),
+            },
+            success: handleBasketResp,
+            error: handleBasketErr
+          });
+      }
+
+
       function handleBidResp(resp) {
         if(resp.error){
           $('#error').html(resp.error)

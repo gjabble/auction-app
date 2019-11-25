@@ -17,11 +17,16 @@
   </form>
   <table class="table table-condensed" id="listings-table">
     <tbody>
-      {% if items %} {% for item in items %}
+      {% if items %}
+      {% for item in items %}
       <tr>
         <td width="30%" rowspan="2"><a href="{% url 'listing' item.id %}"><img src="{{ item.image.url }}" class="img-fluid img-thumbnail" id='image'></a></td>
         <td width="40%"><h3><a href="{% url 'listing' item.id %}">{{ item.title }}</a><h3></td>
-        <td>£{{ item.price }}</td>
+        {% if not item.auction %}
+        <td>£{{ item.price }} (Buy it now)</td>
+        {% else %}
+        <td>£{{item.price}}</td>
+        {% endif %}
       </tr>
       <tr>
         <td>{{ item.description }}</td>
@@ -39,6 +44,7 @@
 
 
 <script type="text/javascript">
+
   $('#search-form').submit(function(e) {
     e.preventDefault();
     let search = $('#search-value').val();
@@ -57,11 +63,17 @@
         $('#listings-table').html('');
         let tabledata = '';
         for(let data of results) {
-          tabledata += `<tbody><tr><td width="30%" rowspan="2"><a href="${window.location.href}${data.pk}"><img src="/media/${data.fields.image}" class="img-fluid img-thumbnail" id='image'></a></td><td width="40%"><h3><a href="${window.location.href}${data.pk}">${data.fields.title}</a><h3></td><td>£${data.fields.price}</td></tr><tr><td>${data.fields.description}</td><td></td></tr></tbody>`
+          if(data.fields.auction) {
+            tabledata += `<tbody><tr><td width="30%" rowspan="2"><a href="${window.location.href}${data.pk}"><img src="/media/${data.fields.image}" class="img-fluid img-thumbnail" id='image'></a></td><td width="40%"><h3><a href="${window.location.href}${data.pk}">${data.fields.title}</a><h3></td><td>£${data.fields.price}</td></tr><tr><td>${data.fields.description}</td><td>${data.fields.endDateTime}</td></tr></tbody>`;
+          } else {
+            tabledata += `<tbody><tr><td width="30%" rowspan="2"><a href="${window.location.href}${data.pk}"><img src="/media/${data.fields.image}" class="img-fluid img-thumbnail" id='image'></a></td><td width="40%"><h3><a href="${window.location.href}${data.pk}">${data.fields.title}</a><h3></td><td>£${data.fields.price} (Buy it now)</td></tr><tr><td>${data.fields.description}</td><td>${data.fields.endDateTime}</td></tr></tbody>`;
+          }
         }
         $('#listings-table').html($(tabledata));
       },
-      error: (er) => {}
+      error: (er) => {
+        console.log(er);
+      }
     });
   })
 </script>

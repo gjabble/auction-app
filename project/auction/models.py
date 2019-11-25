@@ -19,9 +19,14 @@ class Item(models.Model):
     endDateTime = models.DateTimeField(default=now, editable=True)
     userProfile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=8, decimal_places=2, default=0.99)
+    auction = models.BooleanField()
 
 class Bid(models.Model):
     userProfile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     bidDateTime = models.DateTimeField()
+
+class BasketItem(models.Model):
+    userProfile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
