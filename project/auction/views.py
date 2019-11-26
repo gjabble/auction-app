@@ -69,7 +69,6 @@ def searchListings(request):
 
 def listings(request):
     if request.method == 'POST':
-        print(request.POST)
         user = UserProfile.objects.get(username=request.session['username'])
         title = request.POST.get('title')
         description = request.POST.get('description')
@@ -77,11 +76,14 @@ def listings(request):
         dateTime = request.POST.get('datetime')
         price = request.POST.get('price')
         auction = request.POST.get('auction')
-        if(auction == 'false'):
+        stock = request.POST.get('stock')
+        if auction == 'false':
             auction = False
         else:
             auction = True
-        item = Item(title=title, description=description, image=image, endDateTime=dateTime, userProfile=user, price=price, auction=auction)
+        if not stock:
+            stock = 1
+        item = Item(title=title, description=description, image=image, endDateTime=dateTime, userProfile=user, price=price, auction=auction, stock=stock)
         item.save()
         return JsonResponse({'itemId': item.id})
     elif request.method == 'GET':
@@ -203,12 +205,17 @@ def expired(request):
 def basket(request):
     if request.method == 'POST':
         item = Item.objects.get(pk=request.POST.get('itemId'))
+        newstock = item.stock - int(request.POST.get('quantity'))
+        if newstock < 0:
+            return JsonResponse({'error':'item is unavailable for that quantity', 'stock':item.stock})
+        item.stock = newstock
         user = UserProfile.objects.get(username=request.session['username'])
-        # if(item IS IN THE BASKET):
-        basketitem = BasketItem(userProfile=user, item=item)
+        basket = BasketItem.objects.filter(userProfile=user)
+        basketitem = BasketItem(userProfile=user, item=item, quantity=int(request.POST.get('quantity')))
         basketitem.save()
-        return JsonResponse({'success':'successfully added to basket'})
-    else:
+        item.save()
+        return JsonResponse({'success':'successfully added to basket', 'stock':item.stock})
+    elif request.method == 'GET':
         user = UserProfile.objects.get(username=request.session['username'])
         basket = BasketItem.objects.filter(userProfile=user)
         return render(request, 'auction/basket.html', {'items':basket})

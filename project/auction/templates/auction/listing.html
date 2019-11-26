@@ -35,11 +35,69 @@
                   {% if item.auction %}
                   <h4><p id="highest-bid" class="card-text"><b>Current Bid: </b> £{{ item.price }}</p></h4>
                   {% else %}
-                  <h4><p id="highest-bid" class="card-text"><b>Price: </b> £{{ item.price }}</p></h4>
+                  <h4><p class="card-text"><b>Price: </b> £{{ item.price }}</p></h4>
+                  {% if item.stock == 0 %}
+                  <p class="card-text"><b>Stock Left: </b>Out of stock</p>
+                  {% else %}
+                  <p id="stock" class="card-text"><b>Stock Left: </b>{{ item.stock }}</p>
                   {% endif %}
-                  <br>
+                  {% endif %}
                   <p class="card-text"><b></b>
-              <form class="form-inline">
+
+              {% if item.auction %}
+              <form id="auction-form" class="form-inline">
+                <div class="form-group">
+                  {% if not request.session.username %}
+                    <a href="{% url 'login' %}">Log in to bid</a>
+                  {% else %}
+                  {% if expired %}
+                  <p class="card-text"><b>Place Bid: </b> <input class="form-control"
+                    id="bid-amount"
+                    type="number"
+                    name="number"
+                    value="{{ item.price }}"
+                    max="999999.99"
+                    disabled
+                  />
+                    <button type="submit" name="button" class="btn btn-primary" disabled>Bid</button></p>
+                    <div id="error"></div>
+                  {% else %}
+                  <p class="card-text"><b>Place Bid: </b> <input class="form-control"
+                    id="bid-amount"
+                    type="number"
+                    name="number"
+                    value="{{ item.price }}"
+                    max="999999.99"
+                    required
+                  />
+                    <button type="submit" name="button" class="btn btn-primary">Bid</button>
+                  </p>
+                  <div id="error"></div>
+                  {% endif %}
+                  {% endif %}
+                </div>
+              </form>
+              {% else %}
+              <form id="basket-form" class="form-inline">
+                {% if not request.session.username %}
+                  <a href="{% url 'login' %}">Log in to add to basket</a>
+                {% else %}
+                {% if expired or item.stock == 0 %}
+                <label for="quantity">Quantity</label>
+                <input type="number" class="form-control" name="quantity" id="quantity" max="{{item.stock}}" min="1" disabled>
+                <button type="submit" name="button" class="btn btn-primary" disabled>Add to basket</button>
+                {% else %}
+                  <label for="quantity">Quantity</label>
+                  <input type="number" class="form-control" name="quantity" id="quantity" max="{{item.stock}}" min="1" required>
+                  <button id="basket-button" type="submit" name="button" class="btn btn-primary">Add to basket</button>
+                {% endif %}
+                {% endif %}
+              </form>
+              {% endif %}
+
+
+
+              <!-- <form id="form" class="form-inline">
               <div class="form-group">
                 {% if not request.session.username %}
                   <a href="{% url 'login' %}">Log in to bid</a>
@@ -70,16 +128,20 @@
                 </p>
                 <div id="error"></div>
                 {% endif %}
-                {% else %}
-                  {% if expired %}
-                    <button type="button" name="button" class="btn btn-primary" disabled>Add to basket</button>
+                {% else %}                         
+                  {% if expired or item.stock == 0 %}
+                    <label for="quantity">Quantity</label>
+                    <input type="number" class="form-control" name="quantity" id="quantity" max="{{item.stock}}" min="1" disabled>
+                    <button type="submit" name="button" class="btn btn-primary" disabled>Add to basket</button>
                   {% else %}
-                    <button type="button" name="button" class="btn btn-primary" onclick="addToBasket()">Add to basket</button>
+                    <label for="quantity">Quantity</label>
+                    <input type="number" class="form-control" name="quantity" id="quantity" max="{{item.stock}}" min="1" required>
+                    <button type="submit" name="button" class="btn btn-primary" onclick="addToBasket()">Add to basket</button>
                   {% endif %}
                 {% endif %}
                 {% endif %}
               </div>
-              </form>
+              </form> -->
               </div>
           </div>
           <br>
@@ -120,8 +182,31 @@
 
     <script type="text/javascript">
 
+      $('#auction-form').submit(function(e) {
+        e.preventDefault();
+        bidOnItem();
+      });
+
+      $('#basket-form').submit(function(e) {
+        e.preventDefault();
+        addToBasket();
+      })
+
       function handleBasketResp(resp) {
         console.log(resp);
+
+        if(resp.error) {
+          alert(resp.error);
+          return;
+        }
+
+        if(resp.stock === 0) {
+          $('#stock').html(`<b>Stock Left: </b>Out of stock`);
+          $('#quantity').prop('disabled', true);
+          $('#basket-button').prop('disabled', true);
+        } else {
+          $('#stock').html(`<b>Stock Left: </b>${resp.stock}`);
+        }
       }
 
       function handleBasketErr(err) {
@@ -129,19 +214,20 @@
       }
 
       function addToBasket() {
-          let csrf = $("input[name=csrfmiddlewaretoken]").val();
-          $.ajax({
-            url: '/auction/basket/',
-            type: "POST",
-            headers: {
-              "X-CSRFToken": getCookie("csrftoken")
-            },
-            data: {
-              itemId: $("#item").attr("itemid"),
-            },
-            success: handleBasketResp,
-            error: handleBasketErr
-          });
+        let csrf = $("input[name=csrfmiddlewaretoken]").val();
+        $.ajax({
+          url: '/auction/basket/',
+          type: "POST",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken")
+          },
+          data: {
+            itemId: $("#item").attr("itemid"),
+            quantity: $('#quantity').val(),
+          },
+          success: handleBasketResp,
+          error: handleBasketErr
+        });
       }
 
 

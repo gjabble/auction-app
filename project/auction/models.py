@@ -20,6 +20,7 @@ class Item(models.Model):
     userProfile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=8, decimal_places=2, default=0.99)
     auction = models.BooleanField()
+    stock = models.IntegerField()
 
 class Bid(models.Model):
     userProfile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
@@ -30,3 +31,4 @@ class Bid(models.Model):
 class BasketItem(models.Model):
     userProfile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity = models.IntegerField()

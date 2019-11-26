@@ -28,8 +28,12 @@
             <input type="number" class="form-control" id="price" name='price' step="0.01" max="999999.99" required>
           </div>
           <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="auction" name='auction'>
+            <input type="checkbox" class="form-check-input" id="auction" name='auction' onchange="stockVisibiltiy()" checked>
             <label class="form-check-label" for="auction">Auction *</label>
+          </div>
+          <div id="item-stock" class="form-group">
+            <label for="stock">Stock *</label>
+            <input type="number" class="form-control" id="stock" name='stock' onchange="stockVisibiltiy()">
           </div>
           <br>
           <button type="submit" class="btn btn-primary">List Item</button>
@@ -41,6 +45,19 @@
     </div>
 
     <script type="text/javascript">
+
+      $('#item-stock').hide();
+
+      function stockVisibiltiy() {
+        let checked = $('#auction').prop('checked');
+        if(!checked) {
+          $('#item-stock').show();
+          $('#stock').prop('required', true);
+        } else {
+          $('#item-stock').hide();
+          $('#stock').prop('required', false);
+        }
+      }
 
       function handleListResp(resp) {
         window.location = `${window.location.origin}/auction/listings/${resp.itemId}`;
