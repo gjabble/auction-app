@@ -38,6 +38,8 @@ def register(request):
 
 def login(request):
     if request.method == 'GET':
+        if request.session['username']:
+            return redirect('/auction/listings')
         return render(request, 'auction/login.html')
     elif request.method == 'POST':
         try:
@@ -203,19 +205,64 @@ def expired(request):
 
 @loginRequired
 def basket(request):
+
+    def calculateTotals(basket):
+        if not basket:
+            return {'subtotal':0, 'shipping': 0, 'total':0}
+        subtotal = 0
+        for item in basket:
+            temp = Item.objects.get(pk=item.item.id)
+            price = temp.price
+            subtotal += price * item.quantity
+        shipping = 3.50
+        total = float(subtotal) + shipping
+        return {
+            'subtotal': subtotal,
+            'shipping': shipping,
+            'total': total,
+        }
+
+
     if request.method == 'POST':
         item = Item.objects.get(pk=request.POST.get('itemId'))
-        newstock = item.stock - int(request.POST.get('quantity'))
+        quantity = int(request.POST.get('quantity'))
+        newstock = item.stock - quantity
         if newstock < 0:
             return JsonResponse({'error':'item is unavailable for that quantity', 'stock':item.stock})
-        item.stock = newstock
         user = UserProfile.objects.get(username=request.session['username'])
-        basket = BasketItem.objects.filter(userProfile=user)
-        basketitem = BasketItem(userProfile=user, item=item, quantity=int(request.POST.get('quantity')))
-        basketitem.save()
-        item.save()
-        return JsonResponse({'success':'successfully added to basket', 'stock':item.stock})
+        userbasket = BasketItem.objects.filter(userProfile=user)
+        basketitem = userbasket.filter(item=item)
+        item.stock = newstock
+        if basketitem:
+            basketitem = basketitem.first()
+            basketitem.quantity = basketitem.quantity + quantity
+            item.save()
+            basketitem.save()
+            return JsonResponse({'success':'successfully added to basket', 'stock':item.stock})
+        else:
+            basketitem = BasketItem(userProfile=user, item=item, quantity=quantity)
+            basketitem.save()
+            item.save()
+            return JsonResponse({'success':'successfully added to basket', 'stock':item.stock})
     elif request.method == 'GET':
         user = UserProfile.objects.get(username=request.session['username'])
         basket = BasketItem.objects.filter(userProfile=user)
-        return render(request, 'auction/basket.html', {'items':basket})
+        response = calculateTotals(basket)
+        response['items'] = basket
+        return render(request, 'auction/basket.html', response)
+    elif request.method == 'DELETE':
+        data = QueryDict(request.body)
+        itemid = data.get('itemId')
+        basketItemId = data.get('basketItemId')
+        basketitem = BasketItem.objects.get(pk=basketItemId)
+        item = Item.objects.get(pk=itemid)
+        quantity = basketitem.quantity
+        item.stock = item.stock + quantity
+        basketitem.delete()
+        item.save()
+        user = UserProfile.objects.get(username=request.session['username'])
+        basket = BasketItem.objects.filter(userProfile=user)
+        response = calculateTotals(basket)
+        response['success'] = 'successfully removed basket item'
+        response['basketItemId'] = basketItemId
+        return JsonResponse(response)

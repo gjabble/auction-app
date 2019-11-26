@@ -7,19 +7,24 @@
 
 <br>
 <div class="container-fluid">
-  <div class="row justify-content-md-center">
+  <h3 id="empty-basket">Your basket is empty click <a href="{% url 'listings' %}">here</a> to view listings.</h3>
+  {% if not items %}
+  <h3 id="empty-basket">Your basket is empty click <a href="{% url 'listings' %}">here</a> to view listings.</h3>
+  {% else %}
+  <div id="table-container" class="row justify-content-md-center">
       <div class="col-12 col-md-10 col-md-offset-1">
           <table class="table table-hover">
               <thead>
                   <tr>
                       <th>Product</th>
+                      <th class="text-center">Quantity</th>
                       <th class="text-center">Price</th>
                       <th></th>
                   </tr>
               </thead>
               <tbody>
                   {% for item in items %}
-                  <tr>
+                  <tr id="basket-item-{{item.id}}">
                       <td class="col-sm-8 col-md-6">
                       <div class="media">
                           <a class="thumbnail pull-left" href="{% url 'listing' item.item.id %}"> <img class="media-object" src="{{item.item.image.url}}" style="width: 90px; height: 90px;"></a>
@@ -28,33 +33,37 @@
                               <h5 style="padding-left:10px" class="media-heading">{{ item.item.description}}</h5>
                           </div>
                       </div></td>
-
+                      <td class="col-sm-1 col-md-1 text-center"><strong>{{item.quantity}}</strong></td>
                       <td class="col-sm-1 col-md-1 text-center"><strong>£{{ item.item.price }}</strong></td>
                       <td class="col-sm-1 col-md-1">
-                      <button type="button" class="btn btn-danger">
+                      <button type="button" class="btn btn-danger" itemid={{item.item.id}} basketitemid={{item.id}} onclick="removeItem(this)">
                           <span class="glyphicon glyphicon-remove"></span> Remove
                       </button></td>
                   </tr>
                   {% endfor %}
                   <tr>
                       <td></td>
+                      <td></td>
                       <td><h5>Subtotal</h5></td>
                       <td class="text-right">
-                        <h5><strong>
-                        {{ item.item.price }}
+                        <h5><strong id="subtotal">
+                        £{{ subtotal }}
                         </strong></h5></td>
                   </tr>
                   <tr>
                       <td></td>
+                      <td></td>
                       <td><h5>Shipping</h5></td>
-                      <td class="text-right">{{ item.item.price }}<h5><strong></strong></h5></td>
+                      <td class="text-right"><h5><strong id="shipping">£{{ shipping }}</strong></h5></td>
                   </tr>
                   <tr>
                       <td></td>
+                      <td></td>
                       <td><h3>Total</h3></td>
-                      <td class="text-right"><h3><strong>£{{ item.item.price }}</strong></h3></td>
+                      <td class="text-right"><h3><strong id="total">£{{ total }}</strong></h3></td>
                   </tr>
                   <tr>
+                      <td></td>
                       <td></td>
                       <td></td>
                       <td>
@@ -67,6 +76,63 @@
           </table>
       </div>
   </div>
+  {% endif %}
 </div>
+
+<script>
+
+    $('#empty-basket').hide();
+
+    function handleBasketResp(resp) {
+        console.log(resp);
+        $(`#basket-item-${resp.basketItemId}`).html('');
+        if(resp.total === 0) {
+            $('#table-container').hide();
+            $('#empty-basket').show();
+        } else {
+            $('#subtotal').html('£' + resp.subtotal);
+            $('#total').html('£' + resp.total);
+            $('#shipping').html('£' + resp.shipping);
+        }
+    }
+    function handleBasketErr(er) {
+        console.log(er);
+    }
+
+    function removeItem(context) {
+        $.ajax({
+          url: '/auction/basket/',
+          type: "DELETE",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken")
+          },
+          data: {
+            itemId: $(context).attr('itemId'),
+            basketItemId: $(context).attr('basketItemId'),
+          },
+          success: handleBasketResp,
+          error: handleBasketErr
+        });
+    }   
+
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          var cookies = document.cookie.split(";");
+          for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1)
+              );
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+</script>
 
 {% endblock %}

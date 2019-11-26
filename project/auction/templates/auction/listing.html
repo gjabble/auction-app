@@ -95,8 +95,6 @@
               </form>
               {% endif %}
 
-
-
               <!-- <form id="form" class="form-inline">
               <div class="form-group">
                 {% if not request.session.username %}
@@ -142,6 +140,7 @@
                 {% endif %}
               </div>
               </form> -->
+              <p id="message"></p>
               </div>
           </div>
           <br>
@@ -193,20 +192,20 @@
       })
 
       function handleBasketResp(resp) {
-        console.log(resp);
-
+        $('#message').html('');
         if(resp.error) {
-          alert(resp.error);
+          $('#message').html(resp.error);
           return;
         }
-
         if(resp.stock === 0) {
           $('#stock').html(`<b>Stock Left: </b>Out of stock`);
           $('#quantity').prop('disabled', true);
           $('#basket-button').prop('disabled', true);
         } else {
           $('#stock').html(`<b>Stock Left: </b>${resp.stock}`);
+          $('#quantity').prop('max', resp.stock);
         }
+        $('#message').html('Successfully added to <a href="/auction/basket">basket.</a>')
       }
 
       function handleBasketErr(err) {
