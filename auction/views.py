@@ -10,6 +10,7 @@ from django.shortcuts import redirect
 from django.core.mail import send_mail
 from django.conf import settings
 import uuid
+from django import HttpResponse
 
 def index(request):
     return redirect('/auction/listings')
