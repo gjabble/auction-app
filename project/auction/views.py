@@ -38,9 +38,13 @@ def register(request):
 
 def login(request):
     if request.method == 'GET':
-        if request.session['username']:
-            return redirect('/auction/listings')
-        return render(request, 'auction/login.html')
+        try:
+            if request.session['username']:
+                return redirect('/auction/listings')
+            else:
+                return render(request, 'auction/login.html')
+        except:
+            return render(request, 'auction/login.html')
     elif request.method == 'POST':
         try:
             username = request.POST.get('username')
@@ -222,6 +226,19 @@ def basket(request):
             'total': total,
         }
 
+    def filterBasket(basket):
+        user = UserProfile.objects.get(username=request.session['username'])
+        try:
+            for basketitem in basket:
+                item = Item.objects.get(id=basketitem.item.id)
+                if item.endDateTime.replace(tzinfo=None) < datetime.datetime.now():
+                    outdatedBasketItems = BasketItem.objects.filter(item=item)
+                    for outdateditem in outdatedBasketItems:
+                        outdateditem.delete()
+            return BasketItem.objects.filter(userProfile=user)
+        except:
+            return BasketItem.objects.filter(userProfile=user)
+
 
     if request.method == 'POST':
         item = Item.objects.get(pk=request.POST.get('itemId'))
@@ -246,7 +263,7 @@ def basket(request):
             return JsonResponse({'success':'successfully added to basket', 'stock':item.stock})
     elif request.method == 'GET':
         user = UserProfile.objects.get(username=request.session['username'])
-        basket = BasketItem.objects.filter(userProfile=user)
+        basket = filterBasket(BasketItem.objects.filter(userProfile=user))
         response = calculateTotals(basket)
         response['items'] = basket
         return render(request, 'auction/basket.html', response)
