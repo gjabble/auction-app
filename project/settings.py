@@ -113,10 +113,11 @@ USE_TZ = True
 
 LOGIN_URL = '/auction/login/'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'auction/static/')
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'auction/static/')
+# ]
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'auction/static')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
