@@ -294,5 +294,7 @@ def checkout(request):
         item.delete()
     context = calculateTotals(basket)
     context['orderid'] = orderid
-    print(context)
     return render(request, 'auction/checkout.html', context)
+
+def health(request):
+    return HttpResponse('ok')
