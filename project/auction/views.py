@@ -9,6 +9,7 @@ import datetime
 from django.shortcuts import redirect
 from django.core.mail import send_mail
 from django.conf import settings
+import uuid
 
 def index(request):
     return redirect('/auction/listings')
@@ -153,7 +154,7 @@ def bids(request):
             if not previousBidder == user:
                 previousBidderEmail = previousBidder.email
                 subject = "You've been outbid on " + item.title
-                message = "You've been outbid on " + item.title + " at " + amount + " " + " http://" + request.get_host() + "/auction/listings/" + str(item.id)
+                message = "You've been outbid on " + item.title + " at £" + amount + " " + " http://" + request.get_host() + "/auction/listings/" + str(item.id)
                 email_from = settings.EMAIL_HOST_USER
                 recipient_list = previousBidderEmail
                 send_mail(subject, message, email_from, [recipient_list], fail_silently=False)
@@ -207,25 +208,25 @@ def expired(request):
     }
     return render(request, 'auction/expired.html', context)
 
+
+def calculateTotals(basket):
+    if not basket:
+        return {'subtotal':'0.00', 'shipping': '0.00', 'total':'0.00'}
+    subtotal = 0
+    for item in basket:
+        temp = Item.objects.get(pk=item.item.id)
+        price = temp.price
+        subtotal += price * item.quantity
+    shipping = 3.50
+    total = float(subtotal) + shipping
+    return {
+        'subtotal': subtotal,
+        'shipping': str(shipping) + '0' ,
+        'total': str(total) + '0',
+    }
+
 @loginRequired
 def basket(request):
-
-    def calculateTotals(basket):
-        if not basket:
-            return {'subtotal':0, 'shipping': 0, 'total':0}
-        subtotal = 0
-        for item in basket:
-            temp = Item.objects.get(pk=item.item.id)
-            price = temp.price
-            subtotal += price * item.quantity
-        shipping = 3.50
-        total = float(subtotal) + shipping
-        return {
-            'subtotal': subtotal,
-            'shipping': shipping,
-            'total': total,
-        }
-
     def filterBasket(basket):
         user = UserProfile.objects.get(username=request.session['username'])
         try:
@@ -283,3 +284,15 @@ def basket(request):
         response['success'] = 'successfully removed basket item'
         response['basketItemId'] = basketItemId
         return JsonResponse(response)
+
+@loginRequired
+def checkout(request):
+    orderid = uuid.uuid1()
+    user = UserProfile.objects.get(username=request.session['username'])
+    basket = BasketItem.objects.filter(userProfile=user)
+    for item in basket:
+        item.delete()
+    context = calculateTotals(basket)
+    context['orderid'] = orderid
+    print(context)
+    return render(request, 'auction/checkout.html', context)

@@ -15,5 +15,6 @@ urlpatterns = [
     path('bids/<int:itemid>', views.bid, name='bid'),
     path('expired-listings/', views.expired, name='expired'),
     path('listings/search/', views.searchListings, name='search'),
-    path('basket/', views.basket, name='basket')
+    path('basket/', views.basket, name='basket'),
+    path('checkout/', views.checkout, name='checkout')
 ]

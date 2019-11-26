@@ -2,19 +2,17 @@
 {% load static %}
 
   {% block content %}
-    <div class="container jumbotron">
+  <div class="card"><div class="card-header"><h3>Create an Account</h3></div></div><br>
+    <div class="container jumbotron col-4">
       <div class="panel">
-        <br />
         <form id="register">
           {% csrf_token %}
-          <h2 class="form-heading text-important">Create Account</h2>
-          <br />
           <h5 class="text-muted">Enter your information</h5>
           <div class="form-group">
             <input
               type="text"
               class="form-control"
-              id="usernameInput"
+              id="username"
               placeholder="Username"
               name="username"
               required
@@ -24,7 +22,7 @@
             <input
               type="email"
               class="form-control"
-              id="emailInput"
+              id="email"
               placeholder="Email"
               name="email"
               required
@@ -34,7 +32,7 @@
             <input
               type="date"
               class="form-control"
-              id="dobInput"
+              id="dob"
               placeholder="Date of Birth"
               name="dob"
               required
@@ -44,7 +42,7 @@
             <input
               type="password"
               class="form-control"
-              id="passwordInput"
+              id="password"
               placeholder="Password"
               name="password"
               required
@@ -63,13 +61,15 @@
         </form>
       </div>
     </div>
+
+
     <script>
       $(document).ready(function() {
         let today = new Date();
         let dd = today.getDate();
         let mm = today.getMonth() + 1;
         let yyyy = today.getFullYear();
-        $("#dobInput").attr("max", yyyy + "-" + mm + "-" + dd);
+        $("#dob").attr("max", yyyy + "-" + mm + "-" + dd);
       });
 
       function handleRegisterError(err) {
@@ -87,12 +87,12 @@
 
       $("#register").submit(function(e) {
         e.preventDefault();
-        let username = $("#usernameInput")
+        let username = $("#username")
           .val()
           .trim();
-        let password = $("#passwordInput").val();
-        let email = $("#emailInput").val();
-        let dob = $("#dobInput").val();
+        let password = $("#password").val();
+        let email = $("#email").val();
+        let dob = $("#dob").val();
         let csrf = $("input[name=csrfmiddlewaretoken]").val();
         $.ajax({
           url: "/auction/register/",

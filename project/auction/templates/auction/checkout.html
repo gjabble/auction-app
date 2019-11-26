@@ -1,0 +1,26 @@
+{% extends "auction/index.html" %}
+{% load static %}
+
+{% block content %}
+<div class="card"><div class="card-header"><h3>Checkout</h3></div></div><br>
+<div class="container-fluid">
+
+  <div class="jumbotron text-center">
+    <h1 class="display-3">Thank You For Shopping With Us!</h1>
+    <p class="lead"><strong>We confirm that your item has been successfully purchased.</strong> Your payment information is available below.</p>
+    <hr>
+    <div class="jumbotron text-center col-4" style="background-color:white; display: inline-block;">
+    <p>
+      <b>Subtotal: </b>£{{subtotal}}
+    </p>
+    <p>
+      <b>Shipping: </b>£{{shipping}}
+    </p>
+      <h4><b>Total: </b> £{{total}}</h4>
+    </div>
+    <h3><a class="btn btn-primary" href="{% url 'listings' %}" role="button">Continue Shopping</a></h3>
+  </div>
+
+</div>
+
+{% endblock %}
