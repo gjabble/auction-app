@@ -242,6 +242,7 @@
 
 
       function handleBidResp(resp) {
+        $('#spinner').hide();
         if(resp.error){
           $('#error').html(resp.error)
           return;
