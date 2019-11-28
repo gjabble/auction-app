@@ -137,5 +137,5 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'qmul.auction@gmail.com'
 EMAIL_HOST_PASSWORD = '@gjil39gu490w'
 
-import django_heroku
-django_heroku.settings(locals())
+# import django_heroku
+# django_heroku.settings(locals())
