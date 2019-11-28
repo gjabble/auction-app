@@ -100,6 +100,14 @@ def listings(request):
             'items': items
         }
         return render(request, 'auction/listings.html', context)
+    elif request.method == 'PUT':
+        data = QueryDict(request.body)
+        itemid = data.get('itemId')
+        quantity = data.get('quantity')
+        item = Item.objects.get(pk=itemid)
+        item.stock += int(quantity)
+        item.save()
+        return JsonResponse({'quantity': item.stock})
 
 def listing(request, itemid):
     item = Item.objects.get(pk=itemid)

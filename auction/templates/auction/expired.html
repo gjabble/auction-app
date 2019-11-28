@@ -15,7 +15,7 @@
       <tr>
         <td width="30%" rowspan="2"><a href="{% url 'listing' item.id %}"><img src="{{ item.image.url }}" class="img-fluid img-thumbnail" id='image'></a></td>
         <td width="40%"><h3><a href="{% url 'listing' item.id %}">{{ item.title }}</a><h3></td>
-        <td>{{ item.price }}</td>
+        <td>£{{ item.price }}</td>
       </tr>
       <tr>
         <td>{{ item.description }}</td>

@@ -6,8 +6,8 @@
 <head>
 <link rel="stylesheet" type="text/css" href="{% static '/listing.css' %}"/>
 </head>
-    {% if item %}
 
+    {% if item %}
       <div id="item" itemid="{{item.id}}" class="card">
         <div class="card-header">
           {% if expired %}
@@ -37,7 +37,7 @@
                   {% else %}
                   <h4><p class="card-text"><b>Price: </b> £{{ item.price }}</p></h4>
                   {% if item.stock == 0 %}
-                  <p class="card-text"><b>Stock Left: </b>Out of stock</p>
+                  <p id="stock" class="card-text"><b>Stock Left: </b>Out of stock</p>
                   {% else %}
                   <p id="stock" class="card-text"><b>Stock Left: </b>{{ item.stock }}</p>
                   {% endif %}
@@ -56,10 +56,12 @@
                     type="number"
                     name="number"
                     value="{{ item.price }}"
+                    step=".01"
                     max="999999.99"
                     disabled
                   />
-                    <button type="submit" name="button" class="btn btn-primary" disabled>Bid</button></p>
+                    <button type="submit" name="button" class="btn btn-primary" disabled>Bid</button>
+                  </p>
                     <div id="error"></div>
                   {% else %}
                   <p class="card-text"><b>Place Bid: </b> <input class="form-control"
@@ -67,11 +69,18 @@
                     type="number"
                     name="number"
                     value="{{ item.price }}"
+                    step=".01"
                     max="999999.99"
                     required
                   />
                     <button type="submit" name="button" class="btn btn-primary">Bid</button>
+                    <div style="padding-left: 10px">
+                      <div id="spinner" class="spinner-border text-info" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                    </div>
                   </p>
+
                   <div id="error"></div>
                   {% endif %}
                   {% endif %}
@@ -85,61 +94,21 @@
                 {% if expired or item.stock == 0 %}
                 <label for="quantity">Quantity</label>
                 <input type="number" class="form-control" name="quantity" id="quantity" max="{{item.stock}}" min="1" disabled>
-                <button type="submit" name="button" class="btn btn-primary" disabled>Add to basket</button>
+                <button id="basket-button" type="submit" name="button" class="btn btn-primary" disabled>Add to basket</button>
                 {% else %}
                   <label for="quantity">Quantity</label>
                   <input type="number" class="form-control" name="quantity" id="quantity" max="{{item.stock}}" min="1" required>
                   <button id="basket-button" type="submit" name="button" class="btn btn-primary">Add to basket</button>
+                  <div style="padding-left: 10px">
+                    <div id="spinner" class="spinner-border text-info" role="status">
+                      <span class="sr-only">Loading...</span>
+                    </div>
+                  </div>
+
                 {% endif %}
                 {% endif %}
               </form>
               {% endif %}
-
-              <!-- <form id="form" class="form-inline">
-              <div class="form-group">
-                {% if not request.session.username %}
-                  <a href="{% url 'login' %}">Log in to bid</a>
-                {% else %}
-
-                {% if item.auction %}
-
-                {% if expired %}
-                <p class="card-text"><b>Place Bid: </b> <input class="form-control"
-                  id="bid-amount"
-                  type="number"
-                  name="number"
-                  value="{{ item.price }}"
-                  max="999999.99"
-                  disabled
-                />
-                  <button type="button" name="button" class="btn btn-primary" onclick="bidOnItem()" disabled>Bid</button></p>
-                  <div id="error"></div>
-                {% else %}
-                <p class="card-text"><b>Place Bid: </b> <input class="form-control"
-                  id="bid-amount"
-                  type="number"
-                  name="number"
-                  value="{{ item.price }}"
-                  max="999999.99"
-                />
-                  <button type="button" name="button" class="btn btn-primary" onclick="bidOnItem()">Bid</button>
-                </p>
-                <div id="error"></div>
-                {% endif %}
-                {% else %}                         
-                  {% if expired or item.stock == 0 %}
-                    <label for="quantity">Quantity</label>
-                    <input type="number" class="form-control" name="quantity" id="quantity" max="{{item.stock}}" min="1" disabled>
-                    <button type="submit" name="button" class="btn btn-primary" disabled>Add to basket</button>
-                  {% else %}
-                    <label for="quantity">Quantity</label>
-                    <input type="number" class="form-control" name="quantity" id="quantity" max="{{item.stock}}" min="1" required>
-                    <button type="submit" name="button" class="btn btn-primary" onclick="addToBasket()">Add to basket</button>
-                  {% endif %}
-                {% endif %}
-                {% endif %}
-              </div>
-              </form> -->
               <p id="message"></p>
               </div>
           </div>
@@ -177,21 +146,63 @@
 
 
     {% endif %}
+
+    {% if item.userProfile.username == request.session.username and not expired and not item.auction%}
+      <h3>Restock</h3>
+      <form id="restock" class="form-inline">
+        <div class="form-group">
+          <label for="restock">Quantity</label>
+          <input id="restock-value" class="form-control" type="number" name="restock" min="1" max="9999">
+          <button type="submit" name="button" class="btn btn-primary">Restock</button>
+        </div>
+      </form>
+    {% endif %}
     </div>
 
     <script type="text/javascript">
 
+      $('#restock').submit(function(e) {
+        e.preventDefault();
+        $.ajax({
+          url: '/auction/listings/',
+          type: "PUT",
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken")
+          },
+          data: {
+            itemId: $("#item").attr("itemid"),
+            quantity: $('#restock-value').val(),
+          },
+          success: function(resp) {
+            console.log(resp);
+            debugger;
+            $('#stock').html(`<b>Stock Left: </b>${resp.quantity}`);
+            $('#quantity').prop('disabled', false);
+            $('#basket-button').prop('disabled', false);
+            $('#quantity').prop('max', resp.quantity);
+          },
+          error: function(err) {
+            console.log(err);
+          }
+        });
+      });
+
+      $('#spinner').hide();
+
       $('#auction-form').submit(function(e) {
         e.preventDefault();
+        $('#spinner').show();
         bidOnItem();
       });
 
       $('#basket-form').submit(function(e) {
         e.preventDefault();
+        $('#spinner').show();
         addToBasket();
       })
 
       function handleBasketResp(resp) {
+        $('#spinner').hide();
         $('#message').html('');
         if(resp.error) {
           $('#message').html(resp.error);
@@ -266,6 +277,7 @@
       });
 
       function handleGETBidsResp(resp) {
+        $('#spinner').hide();
         $('#bids-list').html('');
         if(!resp.length){
           $('#bids-list').html('There are no bids on this Item');

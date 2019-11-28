@@ -96,7 +96,7 @@
     function handleBasketResp(resp) {
         console.log(resp);
         $(`#basket-item-${resp.basketItemId}`).html('');
-        if(resp.total === 0) {
+        if(resp.total == 0) {
             $('#table-container').hide();
             $('#empty-basket').show();
         } else {
