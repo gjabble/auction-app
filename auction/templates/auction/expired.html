@@ -3,17 +3,13 @@
 
 {% block content %}
 
-<head>
-<link rel="stylesheet" type="text/css" href="{% static '/expired.css' %}"/>
-</head>
-
 <div class="card"><div class="card-header"><h3>Expired Listings</h3></div></div>
 <div class="container-fluid">
   <table class="table table-condensed">
     <tbody>
       {% if items %} {% for item in items %}
       <tr>
-        <td width="30%" rowspan="2"><a href="{% url 'listing' item.id %}"><img src="{{ item.image.url }}" class="img-fluid img-thumbnail" id='image'></a></td>
+        <td width="30%" rowspan="2"><a href="{% url 'listing' item.id %}"><img style="height:250px;width:250px" src="{{ item.image.url }}" class="img-fluid img-thumbnail" id='image'></a></td>
         <td width="40%"><h3><a href="{% url 'listing' item.id %}">{{ item.title }}</a><h3></td>
         <td>£{{ item.price }}</td>
       </tr>

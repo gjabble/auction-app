@@ -3,10 +3,6 @@
 
 {% block content %}
 
-<head>
-<link rel="stylesheet" type="text/css" href="{% static '/listings.css' %}"/>
-</head>
-
 <div class="card"><div class="card-header"><h3>Current Listings</h3></div></div><br>
 <div class='container-fluid'>
   <form id="search-form">
@@ -20,7 +16,7 @@
       {% if items %}
       {% for item in items %}
       <tr>
-        <td width="30%" rowspan="2"><a href="{% url 'listing' item.id %}"><img src="{{ item.image.url }}" class="img-fluid img-thumbnail" id='image'></a></td>
+        <td width="30%" rowspan="2"><a href="{% url 'listing' item.id %}"><img style="height:250px;width:250px" src="{{ item.image.url }}" class="img-fluid img-thumbnail" id='image'></a></td>
         <td width="40%"><h3><a href="{% url 'listing' item.id %}">{{ item.title }}</a><h3></td>
         {% if not item.auction %}
         <td>£{{ item.price }} (Buy it now)</td>
@@ -64,9 +60,9 @@
         let tabledata = '';
         for(let data of results) {
           if(data.fields.auction) {
-            tabledata += `<tbody><tr><td width="30%" rowspan="2"><a href="${window.location.href}${data.pk}"><img src="/media/${data.fields.image}" class="img-fluid img-thumbnail" id='image'></a></td><td width="40%"><h3><a href="${window.location.href}${data.pk}">${data.fields.title}</a><h3></td><td>£${data.fields.price}</td></tr><tr><td>${data.fields.description}</td><td>${data.fields.endDateTime}</td></tr></tbody>`;
+            tabledata += `<tbody><tr><td width="30%" rowspan="2"><a href="${window.location.href}${data.pk}"><img style="height:250px;width:250px" src="/media/${data.fields.image}" class="img-fluid img-thumbnail" id='image'></a></td><td width="40%"><h3><a href="${window.location.href}${data.pk}">${data.fields.title}</a><h3></td><td>£${data.fields.price}</td></tr><tr><td>${data.fields.description}</td><td>${data.fields.endDateTime}</td></tr></tbody>`;
           } else {
-            tabledata += `<tbody><tr><td width="30%" rowspan="2"><a href="${window.location.href}${data.pk}"><img src="/media/${data.fields.image}" class="img-fluid img-thumbnail" id='image'></a></td><td width="40%"><h3><a href="${window.location.href}${data.pk}">${data.fields.title}</a><h3></td><td>£${data.fields.price} (Buy it now)</td></tr><tr><td>${data.fields.description}</td><td>${data.fields.endDateTime}</td></tr></tbody>`;
+            tabledata += `<tbody><tr><td width="30%" rowspan="2"><a href="${window.location.href}${data.pk}"><img style="height:250px;width:250px" src="/media/${data.fields.image}" class="img-fluid img-thumbnail" id='image'></a></td><td width="40%"><h3><a href="${window.location.href}${data.pk}">${data.fields.title}</a><h3></td><td>£${data.fields.price} (Buy it now)</td></tr><tr><td>${data.fields.description}</td><td>${data.fields.endDateTime}</td></tr></tbody>`;
           }
         }
         $('#listings-table').html($(tabledata));

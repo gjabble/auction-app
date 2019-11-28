@@ -3,10 +3,6 @@
 
 {% block content %}
 
-<head>
-<link rel="stylesheet" type="text/css" href="{% static '/listing.css' %}"/>
-</head>
-
     {% if item %}
       <div id="item" itemid="{{item.id}}" class="card">
         <div class="card-header">
@@ -23,7 +19,7 @@
         <div class="col-12">
           <div class="card flex-row flex-wrap">
               <div class="card-header border-0">
-                  <img src="{{ item.image.url }}" class="img-fluid" id="image"/>
+                  <img style="height:320px;width:320px" src="{{ item.image.url }}" class="img-fluid" id="image"/>
               </div>
               <div class="card-block px-2">
                   <h4 class="card-title">{{ item.title }}</h4>
