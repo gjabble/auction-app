@@ -4,3 +4,4 @@ gunicorn==19.5.0
 psycopg2==2.7.3.1
 whitenoise==3.3.1
 pillow==6.2.1
+django_heroku=0.3.1
