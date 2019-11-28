@@ -16,7 +16,7 @@ class Item(models.Model):
     title = models.CharField(max_length=100)
     description = models.CharField(max_length=500)
     image = models.ImageField(upload_to='gallery', blank=True, null=True)
-    endDateTime = models.DateTimeField(default=now, editable=True)
+    endDateTime = models.DateTimeField()
     userProfile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=8, decimal_places=2, default=0.99)
     auction = models.BooleanField()
