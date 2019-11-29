@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 from . import database
+import django_heroku
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -76,8 +77,18 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': database.config()
+# }
 DATABASES = {
-    'default': database.config()
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'mydatabase',
+        'USER': 'mydatabaseuser',
+        'PASSWORD': 'mypassword',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
 }
 
 # Password validation
@@ -137,5 +148,4 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'qmul.auction@gmail.com'
 EMAIL_HOST_PASSWORD = '@gjil39gu490w'
 
-# import django_heroku
-# django_heroku.settings(locals())
+django_heroku.settings(locals())
