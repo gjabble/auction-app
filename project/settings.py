@@ -96,8 +96,8 @@ DATABASES = {
         'NAME': 'mydatabase',
         'USER': os.getenv('DATABASE_USER'),
         'PASSWORD': os.getenv('DATABASE_PASSWORD'),
-        'HOST': os.getenv('{}_SERVICE_HOST'.format(service_name)),
-        'PORT': os.getenv('{}_SERVICE_PORT'.format(service_name)),
+        'HOST': os.getenv('{}_SERVICE_HOST'.format(os.getenv('DATABASE_SERVICE_NAME', '').upper().replace('-', '_'))),
+        'PORT': os.getenv('{}_SERVICE_PORT'.format(os.getenv('DATABASE_SERVICE_NAME', '').upper().replace('-', '_'))),
     }
 }
 
